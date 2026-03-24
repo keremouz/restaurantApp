@@ -1,3 +1,26 @@
 <resources>
-    <string name="app_name">restaurantapp</string>
+    <string name="app_name">Restaurant App</string>
+
+    <string name="map_title">İstanbul Restoran Haritası</string>
+    <string name="login">Giriş Yap</string>
+    <string name="register">Kayıt Ol</string>
+    <string name="back">Geri</string>
+
+    <string name="restaurant_detail_title">Restoran Detayı</string>
+    <string name="restaurant_detail_placeholder">Burada restoran detayları olacak.</string>
+    <string name="favorite_add">Favoriye Ekle</string>
+    <string name="write_review">Yorum Yap</string>
+
+    <string name="login_screen_title">Giriş Yap</string>
+    <string name="register_screen_title">Kayıt Ol</string>
+    <string name="login_placeholder">Login ekranı</string>
+    <string name="register_placeholder">Register ekranı</string>
+    <string name="go_to_register">Kayıt Ol</string>
+
+    <string name="login_content_description">Giriş Yap</string>
+
+    <string name="sample_restaurant_1">Örnek Restoran 1</string>
+    <string name="sample_restaurant_2">Örnek Restoran 2</string>
+    <string name="district_umraniye">Ümraniye</string>
+    <string name="district_kadikoy">Kadıköy</string>
 </resources>
