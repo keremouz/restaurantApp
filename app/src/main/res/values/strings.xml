@@ -17,10 +17,12 @@
     <string name="register_placeholder">Register ekranı</string>
     <string name="go_to_register">Kayıt Ol</string>
 
-    <string name="login_content_description">Giriş Yap</string>
-
     <string name="sample_restaurant_1">Örnek Restoran 1</string>
     <string name="sample_restaurant_2">Örnek Restoran 2</string>
     <string name="district_umraniye">Ümraniye</string>
     <string name="district_kadikoy">Kadıköy</string>
+    <string name="login_content_description">Giriş Yap</string>
+    <string name="map_loading">Yükleniyor...</string>
+    <string name="map_empty">Restoran bulunamadı</string>
+    <string name="map_error_prefix">Hata:</string>
 </resources>
