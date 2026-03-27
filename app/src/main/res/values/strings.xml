@@ -15,7 +15,6 @@
     <string name="register_screen_title">Kayıt Ol</string>
     <string name="login_placeholder">Login ekranı</string>
     <string name="register_placeholder">Register ekranı</string>
-    <string name="go_to_register">Kayıt Ol</string>
 
     <string name="sample_restaurant_1">Örnek Restoran 1</string>
     <string name="sample_restaurant_2">Örnek Restoran 2</string>
@@ -25,4 +24,11 @@
     <string name="map_loading">Yükleniyor...</string>
     <string name="map_empty">Restoran bulunamadı</string>
     <string name="map_error_prefix">Hata:</string>
+    <string name="email">E-posta</string>
+    <string name="password">Şifre</string>
+    <string name="full_name">Ad Soyad</string>
+    <string name="birth_date">Doğum Tarihi</string>
+    <string name="birth_date_hint">GG/AA/YYYY</string>
+    <string name="go_to_register">Hesabın yok mu? Üye Ol</string>
+    <string name="loading">Yükleniyor...</string>
 </resources>
