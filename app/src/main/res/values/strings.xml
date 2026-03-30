@@ -31,4 +31,30 @@
     <string name="birth_date_hint">GG/AA/YYYY</string>
     <string name="go_to_register">Hesabın yok mu? Üye Ol</string>
     <string name="loading">Yükleniyor...</string>
+
+        <string name="account_title">Hesap</string>
+
+
+        <string name="login_heading">Login</string>
+        <string name="register_heading">Register</string>
+
+        <string name="go_to_login">Already have an account? Sign In</string>
+
+        <string name="empty_login_error">E-posta ve şifre boş bırakılamaz</string>
+        <string name="empty_register_error">Tüm alanları doldurun</string>
+
+        <string name="account_guest_title">Hesabına giriş yap</string>
+        <string name="account_guest_desc">Giriş yaparak favori restoranlarını kaydedebilir ve yorumlarını yönetebilirsin.</string>
+        <string name="account_profile_title">Profil</string>
+        <string name="account_logged_in">Giriş yapıldı</string>
+        <string name="account_email">E-posta: %1$s</string>
+        <string name="logout">Çıkış Yap</string>
+
+        <string name="coming_soon_title">Yakında eklenecek</string>
+        <string name="my_restaurants">Restoranlarım</string>
+        <string name="my_comments">Yorum yaptıklarım</string>
+        <string name="profile_info">Profil bilgileri</string>
+
+
+
 </resources>

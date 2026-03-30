@@ -12,9 +12,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.restaurantapp.presentation.account.AccountScreen
-import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
+import com.example.restaurantapp.presentation.AccountScreen
+import com.example.restaurantapp.presentation.FavoritesScreen
 
 @Composable
 fun MainBottomBarScreen(
@@ -81,7 +81,6 @@ fun MainBottomBarScreen(
                     innerPadding = innerPadding,
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = {
-                        // register'a dış navController ile gidilecek
                     }
                 )
             }

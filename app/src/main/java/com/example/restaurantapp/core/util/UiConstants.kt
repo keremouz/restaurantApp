@@ -4,16 +4,15 @@ import androidx.compose.ui.unit.dp
 
 object UiConstants {
     val ScreenPadding = 24.dp
-    val ContentPadding = 16.dp
-    val SmallPadding = 8.dp
-    val MediumPadding = 12.dp
-    val LargePadding = 24.dp
+    val ContentSpacing = 16.dp
+    val SmallSpacing = 8.dp
+    val MediumSpacing = 12.dp
+    val LargeSpacing = 28.dp
 
-    val ButtonCornerRadius = 12.dp
-    val CardCornerRadius = 16.dp
+    val TextFieldRadius = 14.dp
+    val ButtonRadius = 18.dp
+    val CardRadius = 20.dp
 
-    val FabSize = 56.dp
-    val IconSize = 24.dp
-
-    val MapZoomLevel = 11f
+    val ButtonVerticalPadding = 4.dp
+    val CardElevation = 4.dp
 }

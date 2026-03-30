@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.restaurantapp.presentation.account.AccountScreen
+import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.auth.LoginScreen
 import com.example.restaurantapp.presentation.auth.RegisterScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
