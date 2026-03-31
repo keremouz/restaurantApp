@@ -1,5 +1,7 @@
 package com.example.restaurantapp.presentation.map
 
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,16 +11,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.BuildConfig
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.di.RetrofitProvider
+import com.example.restaurantapp.core.network.NetworkChangeReceiver
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
+import com.example.restaurantapp.domain.model.Restaurant
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -29,19 +36,35 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
-    onRestaurantClick: (String) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onRestaurantClick: (Restaurant) -> Unit
 ) {
-    val repository = RestaurantRepositoryImpl(
-        placesApiService = RetrofitProvider.placesApiService,
-        apiKey = BuildConfig.PLACES_API_KEY
-    )
+    val context = LocalContext.current
+
+    val repository = remember {
+        RestaurantRepositoryImpl(
+            placesApiService = RetrofitProvider.placesApiService,
+            apiKey = BuildConfig.PLACES_API_KEY
+        )
+    }
 
     val viewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(repository)
     )
 
     val uiState by viewModel.uiState.collectAsState()
+
+    DisposableEffect(Unit) {
+        val receiver = NetworkChangeReceiver { isConnected ->
+            viewModel.updateConnectionState(isConnected)
+        }
+
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        context.registerReceiver(receiver, filter)
+
+        onDispose {
+            context.unregisterReceiver(receiver)
+        }
+    }
 
     val istanbul = LatLng(41.0082, 28.9784)
 
@@ -57,6 +80,17 @@ fun MapScreen(
         }
     ) { paddingValues ->
         when {
+            !uiState.isConnected -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("İnternet bağlantınızı kontrol edin")
+                }
+            }
+
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier
@@ -110,7 +144,7 @@ fun MapScreen(
                             title = restaurant.name,
                             snippet = restaurant.address,
                             onClick = {
-                                onRestaurantClick(restaurant.placeId)
+                                onRestaurantClick(restaurant)
                                 true
                             }
                         )

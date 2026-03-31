@@ -1,5 +1,6 @@
 package com.example.restaurantapp.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,23 +18,25 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.FavoriteRestaurant
 import com.example.restaurantapp.data.firebase.FavoritesManager
+import com.example.restaurantapp.domain.model.Restaurant
 
 private val FavoritesBg = Color(0xFFF7F7F7)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    onRestaurantClick: (Restaurant) -> Unit
 ) {
     val favoritesManager = remember { FavoritesManager() }
     val favorites = remember { mutableStateListOf<FavoriteRestaurant>() }
@@ -97,9 +100,25 @@ fun FavoritesScreen(
                 ) {
                     items(favorites) { favorite ->
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onRestaurantClick(
+                                        Restaurant(
+                                            placeId = favorite.placeId,
+                                            name = favorite.name,
+                                            latitude = favorite.latitude,
+                                            longitude = favorite.longitude,
+                                            address = favorite.address,
+                                            district = null,
+                                            rating = favorite.rating
+                                        )
+                                    )
+                                },
                             shape = RoundedCornerShape(UiConstants.CardRadius),
-                            elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CardElevation)
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = UiConstants.CardElevation
+                            )
                         ) {
                             Column(
                                 modifier = Modifier

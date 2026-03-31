@@ -12,14 +12,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.restaurantapp.presentation.map.MapScreen
+import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
+import com.example.restaurantapp.presentation.map.MapScreen
 
 @Composable
 fun MainBottomBarScreen(
     onNavigateToLogin: () -> Unit,
-    onRestaurantClick: (String) -> Unit
+    onNavigateToRegister: () -> Unit,
+    onRestaurantClick: (Restaurant) -> Unit
 ) {
     val bottomNavController = rememberNavController()
 
@@ -67,21 +69,22 @@ fun MainBottomBarScreen(
         ) {
             composable(Routes.MAP) {
                 MapScreen(
-                    onRestaurantClick = onRestaurantClick,
-                    onNavigateToLogin = onNavigateToLogin
+                    onRestaurantClick = onRestaurantClick
                 )
             }
 
             composable(Routes.FAVORITES) {
-                FavoritesScreen(innerPadding = innerPadding)
+                FavoritesScreen(
+                    innerPadding = innerPadding,
+                    onRestaurantClick = onRestaurantClick
+                )
             }
 
             composable(Routes.ACCOUNT) {
                 AccountScreen(
                     innerPadding = innerPadding,
                     onNavigateToLogin = onNavigateToLogin,
-                    onNavigateToRegister = {
-                    }
+                    onNavigateToRegister = onNavigateToRegister
                 )
             }
         }

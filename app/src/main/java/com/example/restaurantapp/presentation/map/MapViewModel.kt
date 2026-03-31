@@ -6,38 +6,74 @@ import com.example.restaurantapp.domain.repository.RestaurantRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val restaurantRepository: RestaurantRepository
+    private val repository: RestaurantRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MapUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
     init {
         loadRestaurants()
     }
 
+    fun updateConnectionState(isConnected: Boolean) {
+        _uiState.update {
+            it.copy(isConnected = isConnected)
+        }
+
+        if (isConnected && _uiState.value.restaurants.isEmpty()) {
+            loadRestaurants()
+        }
+
+        if (!isConnected) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "İnternet bağlantınızı kontrol edin"
+                )
+            }
+        }
+    }
+
     fun loadRestaurants() {
+        if (!_uiState.value.isConnected) {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "İnternet bağlantınızı kontrol edin"
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isLoading = true,
-                errorMessage = null
-            )
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
 
             try {
-                val restaurants = restaurantRepository.getNearbyRestaurants()
-
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    restaurants = restaurants
-                )
+                val restaurants = repository.getNearbyRestaurants()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        restaurants = restaurants,
+                        errorMessage = null
+                    )
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = e.message ?: "Bir hata oluştu"
-                )
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Bir hata oluştu"
+                    )
+                }
             }
         }
     }
