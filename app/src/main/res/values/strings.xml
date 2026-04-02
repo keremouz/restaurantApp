@@ -32,28 +32,45 @@
     <string name="go_to_register">Hesabın yok mu? Üye Ol</string>
     <string name="loading">Yükleniyor...</string>
 
-        <string name="account_title">Hesap</string>
+    <string name="account_title">Hesap</string>
 
 
-        <string name="login_heading">Login</string>
-        <string name="register_heading">Register</string>
+    <string name="login_heading">Login</string>
+    <string name="register_heading">Register</string>
 
-        <string name="go_to_login">Already have an account? Sign In</string>
+    <string name="go_to_login">Already have an account? Sign In</string>
 
-        <string name="empty_login_error">E-posta ve şifre boş bırakılamaz</string>
-        <string name="empty_register_error">Tüm alanları doldurun</string>
+    <string name="empty_login_error">E-posta ve şifre boş bırakılamaz</string>
+    <string name="empty_register_error">Tüm alanları doldurun</string>
 
-        <string name="account_guest_title">Hesabına giriş yap</string>
-        <string name="account_guest_desc">Giriş yaparak favori restoranlarını kaydedebilir ve yorumlarını yönetebilirsin.</string>
-        <string name="account_profile_title">Profil</string>
-        <string name="account_logged_in">Giriş yapıldı</string>
-        <string name="account_email">E-posta: %1$s</string>
-        <string name="logout">Çıkış Yap</string>
+    <string name="account_guest_title">Hesabına giriş yap</string>
+    <string name="account_guest_desc">Giriş yaparak favori restoranlarını kaydedebilir ve yorumlarını yönetebilirsin.</string>
+    <string name="account_profile_title">Profil</string>
+    <string name="account_logged_in">Giriş yapıldı</string>
+    <string name="account_email">E-posta: %1$s</string>
+    <string name="logout">Çıkış Yap</string>
 
-        <string name="coming_soon_title">Yakında eklenecek</string>
-        <string name="my_restaurants">Restoranlarım</string>
-        <string name="my_comments">Yorum yaptıklarım</string>
-        <string name="profile_info">Profil bilgileri</string>
+    <string name="coming_soon_title">Yakında eklenecek</string>
+    <string name="my_restaurants">Restoranlarım</string>
+    <string name="my_comments">Yorum yaptıklarım</string>
+    <string name="profile_info">Profil bilgileri</string>
+    <string name="add_to_favorites">Favoriye Ekle</string>
+    <string name="review_criteria_title">Değerlendirme Kriterleri</string>
+
+    <string name="criterion_taste">Lezzet</string>
+    <string name="criterion_service">Servis</string>
+    <string name="criterion_price_performance">F/P</string>
+    <string name="criterion_atmosphere">Ortam</string>
+    <string name="criterion_location">Konum</string>
+
+    <string name="rating_placeholder">1-5</string>
+    <string name="comment_label">Yorumun</string>
+    <string name="submit_comment">Yorum Yap</string>
+    <string name="go_back">Geri Dön</string>
+
+    <string name="favorite_added">Favorilere eklendi</string>
+    <string name="comment_added">Yorum eklendi</string>
+    <string name="fill_review_fields">Tüm kriterleri 1 ile 5 arasında doldur ve yorumunu yaz</string>
 
 
 

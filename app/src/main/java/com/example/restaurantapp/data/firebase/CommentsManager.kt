@@ -12,11 +12,13 @@ class CommentsManager(
         restaurantId: String,
         restaurantName: String,
         comment: String,
-        rating: Double,
+        ratings: CommentRatings,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        val uid = auth.currentUser?.uid
+        val currentUser = auth.currentUser
+        val uid = currentUser?.uid
+
         if (uid == null) {
             onError("Giriş yapmanız gerekiyor")
             return
@@ -24,13 +26,20 @@ class CommentsManager(
 
         val docRef = firestore.collection("comments").document()
 
+        val userName = currentUser.displayName
+            ?: currentUser.email?.substringBefore("@")
+            ?: "Kullanıcı"
+
         val userComment = UserComment(
             commentId = docRef.id,
             userId = uid,
+            userName = userName,
             restaurantId = restaurantId,
             restaurantName = restaurantName,
             comment = comment,
-            rating = rating
+            rating = ratings.average(),
+            ratings = ratings,
+            createdAt = System.currentTimeMillis()
         )
 
         docRef.set(userComment)
