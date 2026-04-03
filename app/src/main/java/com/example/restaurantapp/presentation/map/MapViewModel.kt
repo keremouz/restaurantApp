@@ -16,26 +16,17 @@ class MapViewModel(
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
-    init {
-        loadRestaurants()
-    }
-
     fun updateConnectionState(isConnected: Boolean) {
         _uiState.update {
-            it.copy(isConnected = isConnected)
+            it.copy(
+                isConnected = isConnected,
+                isLoading = false,
+                errorMessage = null
+            )
         }
 
         if (isConnected && _uiState.value.restaurants.isEmpty()) {
             loadRestaurants()
-        }
-
-        if (!isConnected) {
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    errorMessage = "İnternet bağlantınızı kontrol edin"
-                )
-            }
         }
     }
 
@@ -44,7 +35,7 @@ class MapViewModel(
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    errorMessage = "İnternet bağlantınızı kontrol edin"
+                    errorMessage = null
                 )
             }
             return

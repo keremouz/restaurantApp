@@ -9,12 +9,17 @@ object UiConstants {
     val MediumSpacing = 12.dp
     val LargeSpacing = 28.dp
 
+    val TextFieldRadius = 14.dp
+    val ButtonRadius = 18.dp
+    val CardRadius = 20.dp
+
     val ButtonVerticalPadding = 4.dp
     val CardElevation = 4.dp
 
-    val ButtonRadius = 18.dp
     val SmallFieldHeight = 52.dp
     const val CommentFieldMinLines = 4
-
+    val ProfileAvatarSize = 84.dp
+    val WarningBannerHorizontalPadding = 24.dp
+    val WarningBannerVerticalPadding = 8.dp
 
 }

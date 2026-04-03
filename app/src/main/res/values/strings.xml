@@ -15,48 +15,47 @@
     <string name="register_screen_title">Kayıt Ol</string>
     <string name="login_placeholder">Login ekranı</string>
     <string name="register_placeholder">Register ekranı</string>
-
-    <string name="sample_restaurant_1">Örnek Restoran 1</string>
-    <string name="sample_restaurant_2">Örnek Restoran 2</string>
-    <string name="district_umraniye">Ümraniye</string>
-    <string name="district_kadikoy">Kadıköy</string>
     <string name="login_content_description">Giriş Yap</string>
     <string name="map_loading">Yükleniyor...</string>
     <string name="map_empty">Restoran bulunamadı</string>
     <string name="map_error_prefix">Hata:</string>
+
     <string name="email">E-posta</string>
     <string name="password">Şifre</string>
     <string name="full_name">Ad Soyad</string>
     <string name="birth_date">Doğum Tarihi</string>
     <string name="birth_date_hint">GG/AA/YYYY</string>
     <string name="go_to_register">Hesabın yok mu? Üye Ol</string>
-    <string name="loading">Yükleniyor...</string>
-
-    <string name="account_title">Hesap</string>
-
-
-    <string name="login_heading">Login</string>
-    <string name="register_heading">Register</string>
-
     <string name="go_to_login">Already have an account? Sign In</string>
+    <string name="loading">Yükleniyor...</string>
 
     <string name="empty_login_error">E-posta ve şifre boş bırakılamaz</string>
     <string name="empty_register_error">Tüm alanları doldurun</string>
 
+    <string name="account_title">Hesap</string>
     <string name="account_guest_title">Hesabına giriş yap</string>
     <string name="account_guest_desc">Giriş yaparak favori restoranlarını kaydedebilir ve yorumlarını yönetebilirsin.</string>
     <string name="account_profile_title">Profil</string>
     <string name="account_logged_in">Giriş yapıldı</string>
     <string name="account_email">E-posta: %1$s</string>
+    <string name="account_guest_message">Yorumlarını, puanlamalarını ve profil bilgilerini görmek için giriş yapmalısın.</string>
+    <string name="account_profile_default_name">Kullanıcı</string>
+    <string name="account_reviews_title">Yorumlarım ve Değerlendirmelerim</string>
+    <string name="account_no_reviews">Henüz yorum veya değerlendirme yok</string>
+    <string name="account_full_name_value">Ad Soyad: %1$s</string>
+    <string name="account_email_value">E-posta: %1$s</string>
+
+    <string name="login_heading">Login</string>
+    <string name="register_heading">Register</string>
     <string name="logout">Çıkış Yap</string>
 
     <string name="coming_soon_title">Yakında eklenecek</string>
     <string name="my_restaurants">Restoranlarım</string>
     <string name="my_comments">Yorum yaptıklarım</string>
     <string name="profile_info">Profil bilgileri</string>
+
     <string name="add_to_favorites">Favoriye Ekle</string>
     <string name="review_criteria_title">Değerlendirme Kriterleri</string>
-
     <string name="criterion_taste">Lezzet</string>
     <string name="criterion_service">Servis</string>
     <string name="criterion_price_performance">F/P</string>
@@ -72,6 +71,19 @@
     <string name="comment_added">Yorum eklendi</string>
     <string name="fill_review_fields">Tüm kriterleri 1 ile 5 arasında doldur ve yorumunu yaz</string>
 
+    <string name="review_filter_all">Tümü</string>
+    <string name="review_general_rating">Genel Puan</string>
+    <string name="review_selected_score">Seçili Kriter</string>
 
+    <string name="no_internet_banner">İnternet bağlantısı yok</string>
+    <string name="no_internet_page_message">Bu sayfayı görüntülemek için internet bağlantısı gerekiyor.</string>
+    <string name="no_internet_detail_warning">İnternet bağlantısı olmadan restoran detayı açılamaz.</string>
 
+    <string name="favorites_title">Restoranlarım</string>
+    <string name="favorites_empty">Henüz favori restoran eklemediniz.</string>
+    <string name="favorites_rating_value">Puan: %1$s</string>
+
+    <string name="my_information">Bilgilerim</string>
+    <string name="my_reviews">Yaptığım Değerlendirmeler</string>
+    <string name="no_reviews_yet">Değerlendirmeniz yok</string>
 </resources>

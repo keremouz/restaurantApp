@@ -1,24 +1,37 @@
 package com.example.restaurantapp.presentation.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.restaurantapp.R
+import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
 
+private val WarningBannerBg = Color(0xFFD32F2F)
+private val WarningBannerText = Color.White
+
 @Composable
 fun MainBottomBarScreen(
+    isConnected: Boolean,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onRestaurantClick: (Restaurant) -> Unit
@@ -32,6 +45,24 @@ fun MainBottomBarScreen(
     )
 
     Scaffold(
+        topBar = {
+            if (!isConnected) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(WarningBannerBg)
+                        .padding(
+                            horizontal = UiConstants.ScreenPadding,
+                            vertical = UiConstants.SmallSpacing
+                        )
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_internet_banner),
+                        color = WarningBannerText
+                    )
+                }
+            }
+        },
         bottomBar = {
             val navBackStackEntry = bottomNavController.currentBackStackEntryAsState().value
             val currentDestination = navBackStackEntry?.destination
@@ -65,16 +96,19 @@ fun MainBottomBarScreen(
     ) { innerPadding ->
         NavHost(
             navController = bottomNavController,
-            startDestination = Routes.MAP
+            startDestination = Routes.MAP,
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.MAP) {
                 MapScreen(
+                    isConnected = isConnected,
                     onRestaurantClick = onRestaurantClick
                 )
             }
 
             composable(Routes.FAVORITES) {
                 FavoritesScreen(
+                    isConnected = isConnected,
                     innerPadding = innerPadding,
                     onRestaurantClick = onRestaurantClick
                 )
@@ -82,6 +116,7 @@ fun MainBottomBarScreen(
 
             composable(Routes.ACCOUNT) {
                 AccountScreen(
+                    isConnected = isConnected,
                     innerPadding = innerPadding,
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister

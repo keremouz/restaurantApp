@@ -12,6 +12,7 @@ import com.example.restaurantapp.presentation.restaurant.RestaurantDetailScreen
 
 @Composable
 fun AppNavGraph(
+    isConnected: Boolean,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -23,6 +24,7 @@ fun AppNavGraph(
     ) {
         composable(Routes.MAIN) {
             MainBottomBarScreen(
+                isConnected = isConnected,
                 onNavigateToLogin = {
                     navController.navigate(Routes.LOGIN)
                 },
@@ -30,11 +32,13 @@ fun AppNavGraph(
                     navController.navigate(Routes.REGISTER)
                 },
                 onRestaurantClick = { restaurant ->
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("selected_restaurant", restaurant)
+                    if (isConnected) {
+                        navController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("selected_restaurant", restaurant)
 
-                    navController.navigate(Routes.RESTAURANT_DETAIL)
+                        navController.navigate(Routes.RESTAURANT_DETAIL)
+                    }
                 }
             )
         }

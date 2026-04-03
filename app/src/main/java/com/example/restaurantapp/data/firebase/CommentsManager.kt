@@ -37,7 +37,7 @@ class CommentsManager(
             restaurantId = restaurantId,
             restaurantName = restaurantName,
             comment = comment,
-            rating = ratings.average(),
+            generalRating = ratings.average(),
             ratings = ratings,
             createdAt = System.currentTimeMillis()
         )

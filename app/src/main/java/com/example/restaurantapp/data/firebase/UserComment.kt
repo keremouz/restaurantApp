@@ -10,5 +10,4 @@ data class UserComment(
     val generalRating: Double = 0.0,
     val ratings: CommentRatings = CommentRatings(),
     val createdAt: Long = System.currentTimeMillis()
-
 )
