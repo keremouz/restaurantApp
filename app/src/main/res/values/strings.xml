@@ -86,4 +86,11 @@
     <string name="my_information">Bilgilerim</string>
     <string name="my_reviews">Yaptığım Değerlendirmeler</string>
     <string name="no_reviews_yet">Değerlendirmeniz yok</string>
+    <string name="rate_us">Bizi Değerlendirin</string>
+    <string name="language_selection">Dil Seçimi</string>
+    <string name="delete_account">Hesabımı Sil</string>
+    <string name="account_birth_date_value">Doğum Tarihi: %1$s</string>
+    <string name="profile_title">Profil</string>
+    <string name="review_count">Değerlendirme Sayısı</string>
+
 </resources>

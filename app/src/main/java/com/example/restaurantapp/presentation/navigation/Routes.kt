@@ -11,4 +11,6 @@ object Routes {
     const val REGISTER = "register"
 
     const val RESTAURANT_DETAIL = "restaurant_detail"
+
+    const val MY_REVIEWS = "my_reviews"
 }

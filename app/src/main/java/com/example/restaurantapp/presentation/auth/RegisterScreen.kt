@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
@@ -232,7 +231,7 @@ fun RegisterScreen(
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = Color.White,
-                        strokeWidth = 2.dp,
+                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth,
                         modifier = Modifier.padding(vertical = UiConstants.ButtonVerticalPadding)
                     )
                 } else {

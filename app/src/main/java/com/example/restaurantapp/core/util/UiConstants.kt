@@ -16,10 +16,11 @@ object UiConstants {
     val ButtonVerticalPadding = 4.dp
     val CardElevation = 4.dp
 
-    val SmallFieldHeight = 52.dp
     const val CommentFieldMinLines = 4
-    val ProfileAvatarSize = 84.dp
-    val WarningBannerHorizontalPadding = 24.dp
-    val WarningBannerVerticalPadding = 8.dp
+
+    val ProfileAvatarSize = 72.dp
+    val ProfileAvatarIconSize = 36.dp
+    val ProfileHeaderSpacing = 4.dp
+    val LoadingIndicatorStrokeWidth = 2.dp
 
 }

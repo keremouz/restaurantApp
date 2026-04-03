@@ -1,19 +1,32 @@
 package com.example.restaurantapp.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -22,14 +35,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
@@ -40,6 +55,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 private val AccountBlue = Color(0xFF3D4BFF)
 private val AccountBg = Color(0xFFF7F7F7)
+private val AvatarBg = Color(0xFFE8ECFF)
+private val DangerRed = Color(0xFFD32F2F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +64,11 @@ fun AccountScreen(
     isConnected: Boolean,
     innerPadding: PaddingValues,
     onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToMyReviews: () -> Unit,
+    onRateAppClick: () -> Unit,
+    onLanguageClick: () -> Unit,
+    onDeleteAccountClick: () -> Unit
 ) {
     val authManager = remember { AuthManager() }
     val firebaseAuth = remember { FirebaseAuth.getInstance() }
@@ -55,7 +76,8 @@ fun AccountScreen(
 
     var currentUser by remember { mutableStateOf<FirebaseUser?>(firebaseAuth.currentUser) }
     var fullName by remember { mutableStateOf("") }
-    val userComments = remember { mutableStateListOf<Pair<String, String>>() }
+    var birthDate by remember { mutableStateOf("") }
+    var reviewCount by remember { mutableIntStateOf(0) }
 
     DisposableEffect(Unit) {
         val listener = FirebaseAuth.AuthStateListener { auth ->
@@ -71,7 +93,8 @@ fun AccountScreen(
 
     LaunchedEffect(currentUser?.uid, isConnected) {
         fullName = ""
-        userComments.clear()
+        birthDate = ""
+        reviewCount = 0
 
         if (!isConnected) return@LaunchedEffect
 
@@ -82,21 +105,14 @@ fun AccountScreen(
             .get()
             .addOnSuccessListener { document ->
                 fullName = document.getString("fullName").orEmpty()
+                birthDate = document.getString("birthDate").orEmpty()
             }
 
         firestore.collection("comments")
             .whereEqualTo("userId", uid)
             .get()
             .addOnSuccessListener { documents ->
-                userComments.clear()
-                documents.forEach { doc ->
-                    val restaurantName = doc.getString("restaurantName").orEmpty()
-                    val commentText = doc.getString("comment").orEmpty()
-
-                    if (restaurantName.isNotBlank() || commentText.isNotBlank()) {
-                        userComments.add(restaurantName to commentText)
-                    }
-                }
+                reviewCount = documents.size()
             }
     }
 
@@ -106,7 +122,7 @@ fun AccountScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.account_title),
+                        text = stringResource(R.string.profile_title),
                         color = AccountBlue,
                         fontWeight = FontWeight.Bold
                     )
@@ -126,14 +142,23 @@ fun AccountScreen(
                     .background(AccountBg)
                     .padding(innerPadding)
                     .padding(paddingValues)
-                    .padding(UiConstants.ScreenPadding),
-                verticalArrangement = Arrangement.spacedBy(UiConstants.ContentSpacing)
+                    .padding(
+                        start = UiConstants.ScreenPadding,
+                        end = UiConstants.ScreenPadding,
+                        top = 0.dp,
+                        bottom = UiConstants.ScreenPadding
+                    )
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentUser == null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CardElevation)
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = UiConstants.CardElevation
+                        )
                     ) {
                         Column(
                             modifier = Modifier
@@ -141,6 +166,11 @@ fun AccountScreen(
                                 .padding(UiConstants.ScreenPadding),
                             verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
                         ) {
+                            Text(
+                                text = stringResource(R.string.account_guest_message),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
                             Button(
                                 onClick = onNavigateToLogin,
                                 shape = RoundedCornerShape(UiConstants.ButtonRadius),
@@ -163,71 +193,78 @@ fun AccountScreen(
                         }
                     }
                 } else {
+                    ProfileHeader(
+                        fullName = if (fullName.isBlank()) "-" else fullName,
+                        email = currentUser?.email ?: "-"
+                    )
+
                     Text(
                         text = stringResource(R.string.my_information),
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CardElevation)
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = UiConstants.CardElevation
+                        )
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(UiConstants.ScreenPadding),
-                            verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+                            verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
                         ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.account_full_name_value,
-                                    if (fullName.isBlank()) "-" else fullName
-                                ),
-                                style = MaterialTheme.typography.bodyLarge
+                            InfoRow(
+                                title = stringResource(R.string.birth_date),
+                                value = if (birthDate.isBlank()) "-" else birthDate
                             )
 
-                            Text(
-                                text = stringResource(
-                                    R.string.account_email_value,
-                                    currentUser?.email ?: "-"
-                                ),
-                                style = MaterialTheme.typography.bodyMedium
+                            InfoRow(
+                                title = stringResource(R.string.review_count),
+                                value = reviewCount.toString()
                             )
                         }
                     }
 
-                    Text(
-                        text = stringResource(R.string.my_reviews),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.CardElevation)
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = UiConstants.CardElevation
+                        )
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(UiConstants.ScreenPadding),
-                            verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            if (userComments.isEmpty()) {
-                                Text(
-                                    text = stringResource(R.string.no_reviews_yet),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            } else {
-                                userComments.forEach { (restaurantName, comment) ->
-                                    Text(text = "• $restaurantName")
-                                    Text(
-                                        text = comment,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(bottom = UiConstants.SmallSpacing)
-                                    )
-                                }
-                            }
+                            AccountMenuItem(
+                                title = stringResource(R.string.my_reviews),
+                                onClick = onNavigateToMyReviews
+                            )
+
+                            HorizontalDivider()
+
+                            AccountMenuItem(
+                                title = stringResource(R.string.rate_us),
+                                onClick = onRateAppClick
+                            )
+
+                            HorizontalDivider()
+
+                            AccountMenuItem(
+                                title = stringResource(R.string.language_selection),
+                                onClick = onLanguageClick
+                            )
+
+                            HorizontalDivider()
+
+                            AccountMenuItem(
+                                title = stringResource(R.string.delete_account),
+                                onClick = onDeleteAccountClick,
+                                textColor = DangerRed
+                            )
                         }
                     }
 
@@ -242,5 +279,96 @@ fun AccountScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileHeader(
+    fullName: String,
+    email: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(UiConstants.ProfileHeaderSpacing)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(UiConstants.ProfileAvatarSize)
+                .background(AvatarBg, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                tint = AccountBlue,
+                modifier = Modifier.size(UiConstants.ProfileAvatarIconSize)
+            )
+        }
+
+        Text(
+            text = fullName,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = email,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(
+    title: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun AccountMenuItem(
+    title: String,
+    onClick: () -> Unit,
+    textColor: Color = Color.Unspecified
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(UiConstants.ScreenPadding),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            color = textColor,
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = Icons.Outlined.ChevronRight,
+            contentDescription = null,
+            tint = if (textColor == Color.Unspecified) Color.Gray else textColor
+        )
     }
 }

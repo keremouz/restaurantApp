@@ -34,7 +34,8 @@ fun MainBottomBarScreen(
     isConnected: Boolean,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onRestaurantClick: (Restaurant) -> Unit
+    onRestaurantClick: (Restaurant) -> Unit,
+    onNavigateToMyReviews: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
 
@@ -96,8 +97,7 @@ fun MainBottomBarScreen(
     ) { innerPadding ->
         NavHost(
             navController = bottomNavController,
-            startDestination = Routes.MAP,
-            modifier = Modifier.padding(innerPadding)
+            startDestination = Routes.MAP
         ) {
             composable(Routes.MAP) {
                 MapScreen(
@@ -119,7 +119,11 @@ fun MainBottomBarScreen(
                     isConnected = isConnected,
                     innerPadding = innerPadding,
                     onNavigateToLogin = onNavigateToLogin,
-                    onNavigateToRegister = onNavigateToRegister
+                    onNavigateToRegister = onNavigateToRegister,
+                    onNavigateToMyReviews = onNavigateToMyReviews,
+                    onRateAppClick = { },
+                    onLanguageClick = { },
+                    onDeleteAccountClick = { }
                 )
             }
         }

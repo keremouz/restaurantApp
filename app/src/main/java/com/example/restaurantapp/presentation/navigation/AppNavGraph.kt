@@ -1,5 +1,6 @@
 package com.example.restaurantapp.presentation.navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -39,6 +40,9 @@ fun AppNavGraph(
 
                         navController.navigate(Routes.RESTAURANT_DETAIL)
                     }
+                },
+                onNavigateToMyReviews = {
+                    navController.navigate(Routes.MY_REVIEWS)
                 }
             )
         }
@@ -58,6 +62,10 @@ fun AppNavGraph(
                 )
             }
         }
+        composable(Routes.MY_REVIEWS) {
+            Text("My Reviews Screen")
+        }
+
 
         composable(Routes.LOGIN) {
             LoginScreen(
