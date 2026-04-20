@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.restaurantapp.domain.model.Restaurant
+import com.example.restaurantapp.presentation.MyReviewsScreen
 import com.example.restaurantapp.presentation.auth.LoginScreen
 import com.example.restaurantapp.presentation.auth.RegisterScreen
 import com.example.restaurantapp.presentation.restaurant.RestaurantDetailScreen
@@ -63,9 +64,10 @@ fun AppNavGraph(
             }
         }
         composable(Routes.MY_REVIEWS) {
-            Text("My Reviews Screen")
+            MyReviewsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
         }
-
 
         composable(Routes.LOGIN) {
             LoginScreen(

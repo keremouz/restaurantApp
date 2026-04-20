@@ -22,5 +22,16 @@ object UiConstants {
     val ProfileAvatarIconSize = 36.dp
     val ProfileHeaderSpacing = 4.dp
     val LoadingIndicatorStrokeWidth = 2.dp
+    val TinySpacing = 2.dp
+    val ExtraSmallSpacing = 4.dp
+
+    val QuoteIconSize = 18.dp
+    val SmallIconSize = 14.dp
+
+    val PillHorizontalPadding = 10.dp
+    val PillVerticalPadding = 6.dp
+    val SmallPillVerticalPadding = 5.dp
+
+    val PillRadius = 999.dp
 
 }

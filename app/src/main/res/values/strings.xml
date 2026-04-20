@@ -92,5 +92,7 @@
     <string name="account_birth_date_value">Doğum Tarihi: %1$s</string>
     <string name="profile_title">Profil</string>
     <string name="review_count">Değerlendirme Sayısı</string>
+    <string name="my_reviews_empty">Henüz değerlendirme yapmadınız.</string>
+    <string name="review_date_label">Tarih</string>
 
 </resources>

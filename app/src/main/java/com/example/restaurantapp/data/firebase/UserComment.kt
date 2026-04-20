@@ -9,5 +9,6 @@ data class UserComment(
     val comment: String = "",
     val generalRating: Double = 0.0,
     val ratings: CommentRatings = CommentRatings(),
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val district: String = "",
 )

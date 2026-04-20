@@ -43,11 +43,13 @@ private val DetailBlue = Color(0xFF3D4BFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun RestaurantDetailScreen(
     restaurant: Restaurant,
     onBackClick: () -> Unit,
     onRequireLogin: () -> Unit
 ) {
+
     val firebaseAuth = remember { FirebaseAuth.getInstance() }
     val favoritesManager = remember { FavoritesManager() }
     val commentsManager = remember { CommentsManager() }
@@ -228,6 +230,7 @@ fun RestaurantDetailScreen(
                             commentsManager.addComment(
                                 restaurantId = restaurant.placeId,
                                 restaurantName = restaurant.name,
+                                district = extractDistrict(restaurant.address),
                                 comment = commentText.trim(),
                                 ratings = ratings,
                                 onSuccess = {
@@ -260,6 +263,25 @@ fun RestaurantDetailScreen(
                 Text(stringResource(R.string.go_back))
             }
         }
+    }
+}
+private fun extractDistrict(address: String): String {
+    val slashParts = address.split("/")
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+
+    if (slashParts.size >= 2) {
+        return slashParts[slashParts.lastIndex - 1]
+    }
+
+    val commaParts = address.split(",")
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+
+    return if (commaParts.size >= 2) {
+        commaParts[commaParts.lastIndex - 1]
+    } else {
+        address
     }
 }
 

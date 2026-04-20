@@ -11,6 +11,7 @@ class CommentsManager(
     fun addComment(
         restaurantId: String,
         restaurantName: String,
+        district: String,
         comment: String,
         ratings: CommentRatings,
         onSuccess: () -> Unit,
@@ -36,6 +37,7 @@ class CommentsManager(
             userName = userName,
             restaurantId = restaurantId,
             restaurantName = restaurantName,
+            district = district,
             comment = comment,
             generalRating = ratings.average(),
             ratings = ratings,
@@ -46,6 +48,34 @@ class CommentsManager(
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { e ->
                 onError(e.message ?: "Yorum eklenemedi")
+            }
+    }
+
+    fun getCurrentUserComments(
+        onSuccess: (List<UserComment>) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val uid = auth.currentUser?.uid
+
+        if (uid == null) {
+            onError("Giriş yapmanız gerekiyor")
+            return
+        }
+
+        firestore.collection("comments")
+            .whereEqualTo("userId", uid)
+            .get()
+            .addOnSuccessListener { documents ->
+                val comments = documents.documents
+                    .mapNotNull { document ->
+                        document.toObject(UserComment::class.java)
+                    }
+                    .sortedByDescending { it.createdAt }
+
+                onSuccess(comments)
+            }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Yorumlar getirilemedi")
             }
     }
 }
