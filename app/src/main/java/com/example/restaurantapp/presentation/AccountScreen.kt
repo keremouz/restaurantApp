@@ -52,6 +52,7 @@ import com.example.restaurantapp.presentation.components.ConnectionWarningConten
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.foundation.layout.WindowInsets
 
 private val AccountBlue = Color(0xFF3D4BFF)
 private val AccountBg = Color(0xFFF7F7F7)
@@ -117,6 +118,7 @@ fun AccountScreen(
 
     Scaffold(
         containerColor = AccountBg,
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -131,7 +133,7 @@ fun AccountScreen(
     ) { paddingValues ->
         if (!isConnected) {
             ConnectionWarningContent(
-                innerPadding = paddingValues,
+                innerPadding = PaddingValues(),
                 contentPadding = paddingValues
             )
         } else {
@@ -139,7 +141,6 @@ fun AccountScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(AccountBg)
-
                     .padding(paddingValues)
                     .padding(
                         start = UiConstants.ScreenPadding,

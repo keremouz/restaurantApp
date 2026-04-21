@@ -35,14 +35,14 @@ object UiConstants {
     val PillRadius = 999.dp
 
     val BottomBarOuterHorizontalPadding = 16.dp
-    val BottomBarOuterTopPadding = 0.dp
-    val BottomBarOuterBottomPadding = 8.dp
+    val BottomBarOuterTopPadding = 8.dp
+    val BottomBarOuterBottomPadding = 12.dp
 
-    val BottomBarInnerHorizontalPadding = 28.dp
-    val BottomBarInnerVerticalPadding = 10.dp
+    val BottomBarInnerHorizontalPadding = 24.dp
+    val BottomBarInnerVerticalPadding = 12.dp
 
-    val BottomBarCornerRadius = 24.dp
-    val BottomBarIconSize = 20.dp
-    val BottomBarItemCircleSize = 40.dp
+    val BottomBarCornerRadius = 16.dp
+    val BottomBarIconSize = 22.dp
+    val BottomBarItemCircleSize = 36.dp
 
 }

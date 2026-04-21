@@ -32,6 +32,7 @@ import com.example.restaurantapp.data.firebase.FavoriteRestaurant
 import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
+import androidx.compose.foundation.layout.WindowInsets
 
 private val FavoritesBg = Color(0xFFF7F7F7)
 
@@ -64,6 +65,7 @@ fun FavoritesScreen(
 
     Scaffold(
         containerColor = FavoritesBg,
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(text = stringResource(R.string.favorites_title)) }
@@ -72,7 +74,7 @@ fun FavoritesScreen(
     ) { paddingValues ->
         if (!isConnected) {
             ConnectionWarningContent(
-                innerPadding = paddingValues,
+                innerPadding = PaddingValues(),
                 contentPadding = paddingValues
             )
         } else {

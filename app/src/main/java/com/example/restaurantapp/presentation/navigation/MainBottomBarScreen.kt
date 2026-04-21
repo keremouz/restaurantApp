@@ -58,6 +58,7 @@ fun MainBottomBarScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(Color.White)
                     .padding(
                         start = UiConstants.BottomBarOuterHorizontalPadding,
                         end = UiConstants.BottomBarOuterHorizontalPadding,
@@ -121,9 +122,7 @@ fun MainBottomBarScreen(
         NavHost(
             navController = bottomNavController,
             startDestination = Routes.MAP,
-            modifier = Modifier.padding(
-                top = innerPadding.calculateTopPadding()
-            )
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.MAP) {
                 MapScreen(
