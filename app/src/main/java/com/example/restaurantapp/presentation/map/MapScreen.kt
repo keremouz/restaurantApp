@@ -30,6 +30,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,9 +41,10 @@ fun MapScreen(
     val repository = remember {
         RestaurantRepositoryImpl(
             placesApiService = RetrofitProvider.placesApiService,
-            apiKey = BuildConfig.PLACES_API_KEY
+            apiKey = BuildConfig.PLACES_API_KEY,
         )
     }
+    Log.d("KEY_CHECK", "Places key empty: ${BuildConfig.PLACES_API_KEY.isBlank()}")
 
     val viewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(repository)

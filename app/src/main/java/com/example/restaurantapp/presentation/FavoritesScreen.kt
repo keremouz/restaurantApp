@@ -39,7 +39,6 @@ private val FavoritesBg = Color(0xFFF7F7F7)
 @Composable
 fun FavoritesScreen(
     isConnected: Boolean,
-    innerPadding: PaddingValues,
     onRestaurantClick: (Restaurant) -> Unit
 ) {
     val favoritesManager = remember { FavoritesManager() }
@@ -73,7 +72,7 @@ fun FavoritesScreen(
     ) { paddingValues ->
         if (!isConnected) {
             ConnectionWarningContent(
-                innerPadding = innerPadding,
+                innerPadding = paddingValues,
                 contentPadding = paddingValues
             )
         } else {
@@ -82,7 +81,6 @@ fun FavoritesScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding)
                             .padding(paddingValues)
                             .padding(UiConstants.ScreenPadding),
                         verticalArrangement = Arrangement.Center
@@ -95,7 +93,6 @@ fun FavoritesScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding)
                             .padding(paddingValues)
                             .padding(UiConstants.ScreenPadding),
                         verticalArrangement = Arrangement.Center
@@ -108,7 +105,6 @@ fun FavoritesScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding)
                             .padding(paddingValues)
                             .padding(UiConstants.ScreenPadding),
                         verticalArrangement = Arrangement.spacedBy(UiConstants.ContentSpacing)

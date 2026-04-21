@@ -1,21 +1,39 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# RestaurantApp - ProGuard / R8 rules
+
+# Release build'de R8/ProGuard ile
+# - unused code removal
+# - optimization
+# - obfuscation
+# uygulanacaktır.
 #
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Bu projede geniş keep kuralları bilinçli olarak eklenmemiştir.
+# Gerekli olursa yalnızca sorun çıkaran sınıflar hedefli olarak korunacaktır.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+##################################################
+# BİLİNÇLİ OLARAK EKLENMEYEN GENİŞ KURALLAR
+##################################################
+# -keep class com.google.** { *; }
+# -keep class retrofit2.** { *; }
+# -keep class okhttp3.** { *; }
+# -keep class kotlinx.serialization.** { *; }
+# -keep class com.example.restaurantapp.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+##################################################
+# KOTLINX SERIALIZATION
+##################################################
+# Şu an ekstra kural eklenmedi.
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+##################################################
+# FIREBASE AUTH / FIRESTORE
+##################################################
+# Şu an ekstra kural eklenmedi.
+
+##################################################
+# GOOGLE MAPS / MAPS COMPOSE
+##################################################
+# Şu an ekstra kural eklenmedi.
+
+##################################################
+# RETROFIT / OKHTTP
+##################################################
+# Şu an ekstra kural eklenmedi.

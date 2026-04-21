@@ -1,40 +1,45 @@
 package com.example.restaurantapp.presentation.navigation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
-import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
 
-private val WarningBannerBg = Color(0xFFD32F2F)
-private val WarningBannerText = Color.White
+private val BottomBarBlue = Color(0xFF2F5BFF)
+private val BottomBarSelectedIcon = Color.White
+private val BottomBarUnselectedIcon = Color(0xFFDCE4FF)
+private val BottomBarSelectedBg = Color.White.copy(alpha = 0.16f)
 
 @Composable
 fun MainBottomBarScreen(
     isConnected: Boolean,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onRestaurantClick: (Restaurant) -> Unit,
+    onRestaurantClick: (com.example.restaurantapp.domain.model.Restaurant) -> Unit,
     onNavigateToMyReviews: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
@@ -46,58 +51,79 @@ fun MainBottomBarScreen(
     )
 
     Scaffold(
-        topBar = {
-            if (!isConnected) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(WarningBannerBg)
-                        .padding(
-                            horizontal = UiConstants.ScreenPadding,
-                            vertical = UiConstants.SmallSpacing
-                        )
-                ) {
-                    Text(
-                        text = stringResource(R.string.no_internet_banner),
-                        color = WarningBannerText
-                    )
-                }
-            }
-        },
         bottomBar = {
-            val navBackStackEntry = bottomNavController.currentBackStackEntryAsState().value
+            val navBackStackEntry by bottomNavController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
 
-            NavigationBar {
-                items.forEach { item ->
-                    NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
-                        onClick = {
-                            bottomNavController.navigate(item.route) {
-                                popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = UiConstants.BottomBarOuterHorizontalPadding,
+                        end = UiConstants.BottomBarOuterHorizontalPadding,
+                        top = UiConstants.BottomBarOuterTopPadding,
+                        bottom = UiConstants.BottomBarOuterBottomPadding
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(UiConstants.BottomBarCornerRadius),
+                    color = BottomBarBlue,
+                    shadowElevation = UiConstants.CardElevation * 2
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = UiConstants.BottomBarInnerHorizontalPadding,
+                                vertical = UiConstants.BottomBarInnerVerticalPadding
+                            ),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        items.forEach { item ->
+                            val selected = currentDestination?.hierarchy?.any { destination ->
+                                destination.route == item.route
+                            } == true
+
+                            Box(
+                                modifier = Modifier
+                                    .size(UiConstants.BottomBarItemCircleSize)
+                                    .background(
+                                        color = if (selected) BottomBarSelectedBg else Color.Transparent,
+                                        shape = CircleShape
+                                    )
+                                    .clickable {
+                                        bottomNavController.navigate(item.route) {
+                                            popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = null,
+                                    tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                                    modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                                )
                             }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.title
-                            )
-                        },
-                        label = {
-                            Text(text = item.title)
                         }
-                    )
+                    }
                 }
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = bottomNavController,
-            startDestination = Routes.MAP
+            startDestination = Routes.MAP,
+            modifier = Modifier.padding(
+                top = innerPadding.calculateTopPadding()
+            )
         ) {
             composable(Routes.MAP) {
                 MapScreen(
@@ -109,7 +135,6 @@ fun MainBottomBarScreen(
             composable(Routes.FAVORITES) {
                 FavoritesScreen(
                     isConnected = isConnected,
-                    innerPadding = innerPadding,
                     onRestaurantClick = onRestaurantClick
                 )
             }
@@ -117,13 +142,12 @@ fun MainBottomBarScreen(
             composable(Routes.ACCOUNT) {
                 AccountScreen(
                     isConnected = isConnected,
-                    innerPadding = innerPadding,
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister,
                     onNavigateToMyReviews = onNavigateToMyReviews,
-                    onRateAppClick = { },
-                    onLanguageClick = { },
-                    onDeleteAccountClick = { }
+                    onRateAppClick = {},
+                    onLanguageClick = {},
+                    onDeleteAccountClick = {}
                 )
             }
         }

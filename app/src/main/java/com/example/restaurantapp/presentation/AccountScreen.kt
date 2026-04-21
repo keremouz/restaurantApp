@@ -62,7 +62,6 @@ private val DangerRed = Color(0xFFD32F2F)
 @Composable
 fun AccountScreen(
     isConnected: Boolean,
-    innerPadding: PaddingValues,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToMyReviews: () -> Unit,
@@ -132,7 +131,7 @@ fun AccountScreen(
     ) { paddingValues ->
         if (!isConnected) {
             ConnectionWarningContent(
-                innerPadding = innerPadding,
+                innerPadding = paddingValues,
                 contentPadding = paddingValues
             )
         } else {
@@ -140,7 +139,7 @@ fun AccountScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(AccountBg)
-                    .padding(innerPadding)
+
                     .padding(paddingValues)
                     .padding(
                         start = UiConstants.ScreenPadding,

@@ -7,6 +7,7 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
+
 val localProperties = Properties().apply {
     load(rootProject.file("local.properties").inputStream())
 }
@@ -28,11 +29,6 @@ android {
             "\"${localProperties.getProperty("PLACES_API_KEY")}\""
         )
 
-        buildConfigField(
-            "String",
-            "MAPS_API_KEY",
-            "\"${localProperties.getProperty("MAPS_API_KEY")}\""
-        )
 
         manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY")
 
@@ -41,11 +37,17 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 
@@ -98,7 +100,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
