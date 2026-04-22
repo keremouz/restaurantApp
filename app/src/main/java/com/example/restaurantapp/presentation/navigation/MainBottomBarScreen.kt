@@ -28,6 +28,9 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
+import androidx.compose.ui.res.painterResource
+import com.example.restaurantapp.R
+
 
 private val BottomBarBlue = Color(0xFF2F5BFF)
 private val BottomBarSelectedIcon = Color.White
@@ -106,12 +109,34 @@ fun MainBottomBarScreen(
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = null,
-                                    tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
-                                    modifier = Modifier.size(UiConstants.BottomBarIconSize)
-                                )
+                                when (item.route) {
+                                    Routes.MAP -> {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_bottom_home),
+                                            contentDescription = null,
+                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                                        )
+                                    }
+
+                                    Routes.ACCOUNT -> {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_bottom_profile),
+                                            contentDescription = null,
+                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                                        )
+                                    }
+
+                                    else -> {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = null,
+                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
