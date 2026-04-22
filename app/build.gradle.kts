@@ -34,6 +34,25 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "RestaurantApp Dev")
+            buildConfigField("String", "ENV_NAME", "\"dev\"")
+            buildConfigField("Boolean", "IS_DEV", "true")
+        }
+
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "RestaurantApp")
+            buildConfigField("String", "ENV_NAME", "\"prod\"")
+            buildConfigField("Boolean", "IS_DEV", "false")
+        }
+    }
 
     buildTypes {
         release {
