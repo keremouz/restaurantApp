@@ -94,5 +94,15 @@
     <string name="review_count">Değerlendirme Sayısı</string>
     <string name="my_reviews_empty">Henüz değerlendirme yapmadınız.</string>
     <string name="review_date_label">Tarih</string>
+    <string name="login_welcome">Hoş Geldin</string>
+    <string name="login_description">Hesabına giriş yaparak Restorantları keşfetmeye başla.</string>
+    <string name="forgot_password">Şifremi Unuttum</string>
+    <string name="login_with_google_divider">veya Google ile giriş yap</string>
+    <string name="no_account_question">Hesabın yok mu?</string>
+    <string name="register_short">Kayıt Ol</string>
+    <string name="login_fill_fields">Lütfen e-posta ve şifre alanlarını doldur.</string>
+    <string name="google_sign_in">Google ile giriş yap</string>
+    <string name="email_hint">ornek@gmail.com</string>
+    <string name="password_hint">••••••••••••</string>
 
 </resources>

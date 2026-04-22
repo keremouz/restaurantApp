@@ -69,4 +69,47 @@ class AuthManager(
     fun logout() {
         auth.signOut()
     }
+
+    suspend fun signInWithGoogle(
+        context: android.content.Context,
+        credentialRequest: androidx.credentials.GetCredentialRequest,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        try {
+            val credentialManager = androidx.credentials.CredentialManager.create(context)
+            val result = credentialManager.getCredential(
+                context = context,
+                request = credentialRequest
+            )
+
+            val credential = result.credential
+
+            if (
+                credential is androidx.credentials.CustomCredential &&
+                credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            ) {
+                val googleIdTokenCredential =
+                    com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+                        .createFrom(credential.data)
+
+                val firebaseCredential = com.google.firebase.auth.GoogleAuthProvider.getCredential(
+                    googleIdTokenCredential.idToken,
+                    null
+                )
+
+                auth.signInWithCredential(firebaseCredential)
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        onError(exception.message ?: "Google ile giriş başarısız")
+                    }
+            } else {
+                onError("Google credential alınamadı")
+            }
+        } catch (e: Exception) {
+            onError(e.message ?: "Google ile giriş başarısız")
+        }
+    }
 }

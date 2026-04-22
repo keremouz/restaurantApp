@@ -44,5 +44,12 @@ object UiConstants {
     val BottomBarCornerRadius = 16.dp
     val BottomBarIconSize = 22.dp
     val BottomBarItemCircleSize = 36.dp
+    val LoginTopSpacing = 18.dp
+    val LoginFieldSpacing = 18.dp
+    val LoginButtonHeight = 56.dp
+    val LoginButtonRadius = 30.dp
+    val LoginBottomSpacing = 22.dp
+    val LoginSocialButtonSize = 46.dp
+    val LoginSocialIconSize = 22.dp
 
 }
