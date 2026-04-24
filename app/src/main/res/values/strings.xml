@@ -114,4 +114,10 @@
 
     <string name="invalid_birth_date">Doğum tarihini doğru formatında girin.</string>
 
+    <string name="favorites_login_required_title">Giriş yapmanız gerekiyor</string>
+    <string name="favorites_login_required_description">Favori restoranlarını görmek için önce giriş yapmalısın.</string>
+    <string name="empty_favorites_title">Hiç favori yok</string>
+    <string name="empty_favorites_description">Favorilere eklediğin restoranlar burada görünecek.</string>
+    <string name="empty_favorites_image_desc">Boş favoriler görseli</string>
+
 </resources>
