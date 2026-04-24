@@ -1,15 +1,19 @@
 package com.example.restaurantapp.presentation
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -42,8 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
@@ -52,12 +59,12 @@ import com.example.restaurantapp.presentation.components.ConnectionWarningConten
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.compose.foundation.layout.WindowInsets
 
 private val AccountBlue = Color(0xFF3D4BFF)
-private val AccountBg = Color(0xFFF7F7F7)
+private val AccountBg = Color(0xFFFBFBFB)
 private val AvatarBg = Color(0xFFE8ECFF)
 private val DangerRed = Color(0xFFD32F2F)
+private val GuestTextGray = Color(0xFF4F4F4F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,17 +125,19 @@ fun AccountScreen(
 
     Scaffold(
         containerColor = AccountBg,
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.profile_title),
-                        color = AccountBlue,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            )
+            if (currentUser != null) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.profile_title),
+                            color = AccountBlue,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+            }
         }
     ) { paddingValues ->
         if (!isConnected) {
@@ -136,6 +145,79 @@ fun AccountScreen(
                 innerPadding = PaddingValues(),
                 contentPadding = paddingValues
             )
+        }else if (currentUser == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(AccountBg)
+                    .padding(paddingValues)
+                    .padding(
+                        start = UiConstants.ScreenPadding,
+                        end = UiConstants.ScreenPadding,
+                        top = 0.dp,
+                        bottom = UiConstants.ScreenPadding
+                    )
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.weight(1.2f))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.img_guest_welcome),
+                        contentDescription = null,
+                        modifier = Modifier.size(450.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = stringResource(R.string.account_guest_message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = GuestTextGray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(0.82f)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = onNavigateToLogin,
+                        shape = RoundedCornerShape(UiConstants.LoginButtonRadius),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccountBlue),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(UiConstants.LoginButtonHeight)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.login),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedButton(
+                        onClick = onNavigateToRegister,
+                        shape = RoundedCornerShape(UiConstants.LoginButtonRadius),
+                        border = BorderStroke(1.dp, Color(0xFFD0D0D8)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(UiConstants.LoginButtonHeight)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.register),
+                            color = AccountBlue,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(28.dp))
+                }
+            }
         } else {
             Column(
                 modifier = Modifier
@@ -152,130 +234,88 @@ fun AccountScreen(
                 verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (currentUser == null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = UiConstants.CardElevation
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(UiConstants.ScreenPadding),
-                            verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.account_guest_message),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                ProfileHeader(
+                    fullName = if (fullName.isBlank()) "-" else fullName,
+                    email = currentUser?.email ?: "-"
+                )
 
-                            Button(
-                                onClick = onNavigateToLogin,
-                                shape = RoundedCornerShape(UiConstants.ButtonRadius),
-                                colors = ButtonDefaults.buttonColors(containerColor = AccountBlue),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(stringResource(R.string.login))
-                            }
+                Text(
+                    text = stringResource(R.string.my_information),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                            OutlinedButton(
-                                onClick = onNavigateToRegister,
-                                shape = RoundedCornerShape(UiConstants.ButtonRadius),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.register),
-                                    color = AccountBlue
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    ProfileHeader(
-                        fullName = if (fullName.isBlank()) "-" else fullName,
-                        email = currentUser?.email ?: "-"
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(UiConstants.CardRadius),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = UiConstants.CardElevation
                     )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(UiConstants.ScreenPadding),
+                        verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
+                    ) {
+                        InfoRow(
+                            title = stringResource(R.string.birth_date),
+                            value = if (birthDate.isBlank()) "-" else birthDate
+                        )
 
-                    Text(
-                        text = stringResource(R.string.my_information),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.fillMaxWidth()
+                        InfoRow(
+                            title = stringResource(R.string.review_count),
+                            value = reviewCount.toString()
+                        )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(UiConstants.CardRadius),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = UiConstants.CardElevation
                     )
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = UiConstants.CardElevation
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(UiConstants.ScreenPadding),
-                            verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
-                        ) {
-                            InfoRow(
-                                title = stringResource(R.string.birth_date),
-                                value = if (birthDate.isBlank()) "-" else birthDate
-                            )
-
-                            InfoRow(
-                                title = stringResource(R.string.review_count),
-                                value = reviewCount.toString()
-                            )
-                        }
-                    }
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(UiConstants.CardRadius),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = UiConstants.CardElevation
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            AccountMenuItem(
-                                title = stringResource(R.string.my_reviews),
-                                onClick = onNavigateToMyReviews
-                            )
-
-                            HorizontalDivider()
-
-                            AccountMenuItem(
-                                title = stringResource(R.string.rate_us),
-                                onClick = onRateAppClick
-                            )
-
-                            HorizontalDivider()
-
-                            AccountMenuItem(
-                                title = stringResource(R.string.language_selection),
-                                onClick = onLanguageClick
-                            )
-
-                            HorizontalDivider()
-
-                            AccountMenuItem(
-                                title = stringResource(R.string.delete_account),
-                                onClick = onDeleteAccountClick,
-                                textColor = DangerRed
-                            )
-                        }
-                    }
-
-                    Button(
-                        onClick = { authManager.logout() },
-                        shape = RoundedCornerShape(UiConstants.ButtonRadius),
-                        colors = ButtonDefaults.buttonColors(containerColor = AccountBlue),
+                ) {
+                    Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.logout))
+                        AccountMenuItem(
+                            title = stringResource(R.string.my_reviews),
+                            onClick = onNavigateToMyReviews
+                        )
+
+                        HorizontalDivider()
+
+                        AccountMenuItem(
+                            title = stringResource(R.string.rate_us),
+                            onClick = onRateAppClick
+                        )
+
+                        HorizontalDivider()
+
+                        AccountMenuItem(
+                            title = stringResource(R.string.language_selection),
+                            onClick = onLanguageClick
+                        )
+
+                        HorizontalDivider()
+
+                        AccountMenuItem(
+                            title = stringResource(R.string.delete_account),
+                            onClick = onDeleteAccountClick,
+                            textColor = DangerRed
+                        )
                     }
+                }
+
+                Button(
+                    onClick = { authManager.logout() },
+                    shape = RoundedCornerShape(UiConstants.ButtonRadius),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccountBlue),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.logout))
                 }
             }
         }
