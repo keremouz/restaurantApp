@@ -104,5 +104,14 @@
     <string name="google_sign_in">Google ile giriş yap</string>
     <string name="email_hint">ornek@gmail.com</string>
     <string name="password_hint">••••••••••••</string>
+    <string name="register_screen_title_new">Yeni Hesap</string>
+    <string name="register_heading_new">Yeni Hesap</string>
+    <string name="register_description">Hesabını oluşturarak favori restoranlarını kaydedebilir ve değerlendirmelerini yönetebilirsin.</string>
+    <string name="register_terms_text">Devam ederek kullanım koşullarını ve gizlilik politikasını kabul etmiş olursun.</string>
+    <string name="register_with_google_divider">veya Google ile kayıt ol</string>
+    <string name="have_account_question">Zaten hesabın var mı?</string>
+    <string name="full_name_hint">Ad Soyad</string>
+
+    <string name="invalid_birth_date">Doğum tarihini doğru formatında girin.</string>
 
 </resources>
