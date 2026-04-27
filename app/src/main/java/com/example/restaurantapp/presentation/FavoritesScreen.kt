@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -92,6 +93,9 @@ fun FavoritesScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var refreshKey by remember { mutableIntStateOf(0) }
 
+    var isFavoritesLoading by remember { mutableStateOf(false) }
+    var hasLoadedFavorites by remember { mutableStateOf(false) }
+
     DisposableEffect(Unit) {
         val listener = FirebaseAuth.AuthStateListener { auth ->
             currentUser = auth.currentUser
@@ -124,6 +128,8 @@ fun FavoritesScreen(
             favorites.clear()
             favoriteRatings = emptyMap()
             errorMessage = null
+            isFavoritesLoading = false
+            hasLoadedFavorites = false
             return@LaunchedEffect
         }
 
@@ -133,8 +139,13 @@ fun FavoritesScreen(
             favorites.clear()
             favoriteRatings = emptyMap()
             errorMessage = null
+            isFavoritesLoading = false
+            hasLoadedFavorites = false
             return@LaunchedEffect
         }
+
+        isFavoritesLoading = true
+        hasLoadedFavorites = false
 
         favoritesManager.getFavorites(
             onSuccess = { list ->
@@ -142,12 +153,21 @@ fun FavoritesScreen(
                 favorites.addAll(list)
                 errorMessage = null
 
+                if (list.isEmpty()) {
+                    favoriteRatings = emptyMap()
+                    isFavoritesLoading = false
+                    hasLoadedFavorites = true
+                    return@getFavorites
+                }
+
                 loadFavoriteRatings(
                     firestore = firestore,
                     currentUserId = user.uid,
                     favorites = list,
                     onLoaded = { ratings ->
                         favoriteRatings = ratings
+                        isFavoritesLoading = false
+                        hasLoadedFavorites = true
                     }
                 )
             },
@@ -155,6 +175,8 @@ fun FavoritesScreen(
                 favorites.clear()
                 favoriteRatings = emptyMap()
                 errorMessage = error
+                isFavoritesLoading = false
+                hasLoadedFavorites = true
             }
         )
     }
@@ -192,6 +214,20 @@ fun FavoritesScreen(
                 FavoritesLoginRequiredContent(
                     modifier = Modifier.padding(paddingValues)
                 )
+            }
+
+            isFavoritesLoading || !hasLoadedFavorites -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = FavoriteBlue,
+                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth
+                    )
+                }
             }
 
             errorMessage != null -> {

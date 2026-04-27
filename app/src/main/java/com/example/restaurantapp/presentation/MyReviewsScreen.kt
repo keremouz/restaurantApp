@@ -2,6 +2,7 @@ package com.example.restaurantapp.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,9 +49,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.CommentsManager
@@ -59,17 +61,22 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import java.util.Locale
 
-private val ReviewBg = Color(0xFFF7F8FA)
+private val ReviewBg = Color(0xFFF7F8FC)
 private val ReviewCardBg = Color(0xFFFFFFFF)
-private val ReviewTitleColor = Color(0xFF161616)
-private val ReviewBodyColor = Color(0xFF4F4F4F)
-private val ReviewMutedColor = Color(0xFF9A9A9A)
-private val ReviewDividerColor = Color(0xFFEAEAEA)
-private val ReviewBlue = Color(0xFF3D4BFF)
-private val ReviewBlueSoft = Color(0xFFE9ECFF)
-private val ReviewGold = Color(0xFFB88900)
-private val ReviewGoldSoft = Color(0xFFFFF4CC)
-private val ReviewMetaPillBg = Color(0xFFF4F4F6)
+private val ReviewCardBorder = Color(0xFFE1E6F5)
+
+private val ReviewTitleColor = Color(0xFF173B9F)
+private val ReviewBodyColor = Color(0xFF3F4A66)
+private val ReviewMutedColor = Color(0xFF7A8299)
+private val ReviewDividerColor = Color(0xFFE7EAF3)
+
+private val ReviewBlue = Color(0xFF244ED8)
+private val ReviewBlueSoft = Color(0xFFEAF0FF)
+
+private val ReviewGold = Color(0xFF9B6B00)
+private val ReviewGoldSoft = Color(0xFFFFF1C2)
+
+private val ReviewMetaPillBg = Color(0xFFF1F4FA)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +133,8 @@ fun MyReviewsScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.my_reviews),
-                        color = ReviewTitleColor
+                        color = ReviewTitleColor,
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {
@@ -222,7 +230,6 @@ private fun ReviewsHeader(
             .padding(bottom = UiConstants.SmallSpacing),
         verticalArrangement = Arrangement.spacedBy(UiConstants.TinySpacing)
     ) {
-
         Text(
             text = "Deneyimleriniz.",
             style = MaterialTheme.typography.headlineMedium,
@@ -251,9 +258,8 @@ private fun ReviewArchiveCard(
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(UiConstants.CardRadius),
         colors = CardDefaults.cardColors(containerColor = ReviewCardBg),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = UiConstants.CardElevation
-        )
+        border = BorderStroke(1.dp, ReviewCardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
