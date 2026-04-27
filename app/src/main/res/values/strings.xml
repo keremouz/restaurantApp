@@ -119,5 +119,7 @@
     <string name="empty_favorites_title">Hiç favori yok</string>
     <string name="empty_favorites_description">Favorilere eklediğin restoranlar burada görünecek.</string>
     <string name="empty_favorites_image_desc">Boş favoriler görseli</string>
+    <string name="my_favorites">Favorilerim</string>
+
 
 </resources>

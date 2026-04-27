@@ -1,14 +1,19 @@
 package com.example.restaurantapp.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,9 +26,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +42,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.FavoriteRestaurant
@@ -43,9 +56,23 @@ import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Locale
 
-private val FavoritesBg = Color(0xFFFBFBFB)
-private val EmptyTextGray = Color(0xFF6B6B6B)
+private val FavoritesBg = Color(0xFFF7F7FB)
+private val FavoriteItemBg = Color(0xFFEFF4FF)
+private val FavoriteCardBorder = Color(0xFFD6E2FF)
+
+private val FavoriteBlue = Color(0xFF244ED8)
+private val TitleBlue = Color(0xFF0B2F86)
+private val SoftBlue = Color(0xFF66789E)
+
+private data class FavoriteRatingInfo(
+    val myRating: Double? = null,
+    val othersAverageRating: Double? = null
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,20 +81,57 @@ fun FavoritesScreen(
     onRestaurantClick: (Restaurant) -> Unit
 ) {
     val favoritesManager = remember { FavoritesManager() }
+    val firebaseAuth = remember { FirebaseAuth.getInstance() }
+    val firestore = remember { FirebaseFirestore.getInstance() }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     val favorites = remember { mutableStateListOf<FavoriteRestaurant>() }
-    val currentUser = FirebaseAuth.getInstance().currentUser
 
+    var currentUser by remember { mutableStateOf<FirebaseUser?>(firebaseAuth.currentUser) }
+    var favoriteRatings by remember { mutableStateOf<Map<String, FavoriteRatingInfo>>(emptyMap()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var refreshKey by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(isConnected, currentUser?.uid) {
+    DisposableEffect(Unit) {
+        val listener = FirebaseAuth.AuthStateListener { auth ->
+            currentUser = auth.currentUser
+            refreshKey++
+        }
+
+        firebaseAuth.addAuthStateListener(listener)
+
+        onDispose {
+            firebaseAuth.removeAuthStateListener(listener)
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                refreshKey++
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(isConnected, currentUser?.uid, refreshKey) {
         if (!isConnected) {
             favorites.clear()
+            favoriteRatings = emptyMap()
             errorMessage = null
             return@LaunchedEffect
         }
 
-        if (currentUser == null) {
+        val user = currentUser
+
+        if (user == null) {
             favorites.clear()
+            favoriteRatings = emptyMap()
             errorMessage = null
             return@LaunchedEffect
         }
@@ -77,8 +141,19 @@ fun FavoritesScreen(
                 favorites.clear()
                 favorites.addAll(list)
                 errorMessage = null
+
+                loadFavoriteRatings(
+                    firestore = firestore,
+                    currentUserId = user.uid,
+                    favorites = list,
+                    onLoaded = { ratings ->
+                        favoriteRatings = ratings
+                    }
+                )
             },
             onError = { error ->
+                favorites.clear()
+                favoriteRatings = emptyMap()
                 errorMessage = error
             }
         )
@@ -89,7 +164,19 @@ fun FavoritesScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.favorites_title)) }
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = FavoritesBg,
+                    scrolledContainerColor = FavoritesBg
+                ),
+                title = {
+                    Text(
+                        text = stringResource(R.string.favorites_title),
+                        color = TitleBlue,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
             )
         }
     ) { paddingValues ->
@@ -108,14 +195,18 @@ fun FavoritesScreen(
             }
 
             errorMessage != null -> {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(UiConstants.ScreenPadding),
-                    verticalArrangement = Arrangement.Center
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(errorMessage ?: "")
+                    Text(
+                        text = errorMessage.orEmpty(),
+                        color = TitleBlue,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
 
@@ -126,53 +217,130 @@ fun FavoritesScreen(
             }
 
             else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(UiConstants.ScreenPadding),
-                    verticalArrangement = Arrangement.spacedBy(UiConstants.ContentSpacing)
-                ) {
-                    items(favorites) { favorite ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onRestaurantClick(
-                                        Restaurant(
-                                            placeId = favorite.placeId,
-                                            name = favorite.name,
-                                            latitude = favorite.latitude,
-                                            longitude = favorite.longitude,
-                                            address = favorite.address,
-                                            district = null,
-                                            rating = favorite.rating
-                                        )
-                                    )
-                                },
-                            shape = RoundedCornerShape(UiConstants.CardRadius),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = UiConstants.CardElevation
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(UiConstants.ScreenPadding),
-                                verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
-                            ) {
-                                Text(text = favorite.name)
-                                Text(text = favorite.address)
-                                Text(
-                                    text = stringResource(
-                                        R.string.favorites_rating_value,
-                                        favorite.rating?.toString() ?: "-"
-                                    )
-                                )
-                            }
-                        }
-                    }
+                FavoritesContent(
+                    favorites = favorites,
+                    ratings = favoriteRatings,
+                    modifier = Modifier.padding(paddingValues),
+                    onRestaurantClick = onRestaurantClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoritesContent(
+    favorites: List<FavoriteRestaurant>,
+    ratings: Map<String, FavoriteRatingInfo>,
+    modifier: Modifier = Modifier,
+    onRestaurantClick: (Restaurant) -> Unit
+) {
+    val sortedFavorites = favorites.sortedBy { it.name.lowercase() }
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(FavoritesBg)
+            .padding(horizontal = UiConstants.ScreenPadding),
+        contentPadding = PaddingValues(
+            top = UiConstants.ContentSpacing,
+            bottom = UiConstants.ContentSpacing
+        ),
+        verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
+    ) {
+        items(sortedFavorites) { favorite ->
+            val ratingInfo = ratings[favorite.placeId]
+                ?: ratings[favorite.name]
+                ?: FavoriteRatingInfo()
+
+            FavoriteItemCard(
+                favorite = favorite,
+                ratingInfo = ratingInfo,
+                onClick = {
+                    onRestaurantClick(
+                        Restaurant(
+                            placeId = favorite.placeId,
+                            name = favorite.name,
+                            latitude = favorite.latitude,
+                            longitude = favorite.longitude,
+                            address = favorite.address,
+                            district = null,
+                            rating = null
+                        )
+                    )
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavoriteItemCard(
+    favorite: FavoriteRestaurant,
+    ratingInfo: FavoriteRatingInfo,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = FavoriteItemBg
+        ),
+        border = BorderStroke(1.dp, FavoriteCardBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = UiConstants.ContentSpacing,
+                    vertical = UiConstants.MediumSpacing
+                )
+        ) {
+            Text(
+                text = favorite.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = TitleBlue,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
+
+            Text(
+                text = favorite.address,
+                style = MaterialTheme.typography.bodySmall,
+                color = SoftBlue,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Benim Puanım: ${formatRating(ratingInfo.myRating)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = FavoriteBlue,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Text(
+                    text = "Genel: ${formatRating(ratingInfo.othersAverageRating)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = FavoriteBlue,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
             }
         }
     }
@@ -201,6 +369,7 @@ private fun FavoritesLoginRequiredContent(
         Text(
             text = stringResource(R.string.favorites_login_required_title),
             style = MaterialTheme.typography.titleMedium,
+            color = TitleBlue,
             textAlign = TextAlign.Center
         )
 
@@ -209,7 +378,7 @@ private fun FavoritesLoginRequiredContent(
         Text(
             text = stringResource(R.string.favorites_login_required_description),
             style = MaterialTheme.typography.bodyMedium,
-            color = EmptyTextGray,
+            color = SoftBlue,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(0.9f)
         )
@@ -239,6 +408,7 @@ private fun EmptyFavoritesContent(
         Text(
             text = stringResource(R.string.empty_favorites_title),
             style = MaterialTheme.typography.titleMedium,
+            color = TitleBlue,
             textAlign = TextAlign.Center
         )
 
@@ -247,9 +417,127 @@ private fun EmptyFavoritesContent(
         Text(
             text = stringResource(R.string.empty_favorites_description),
             style = MaterialTheme.typography.bodyMedium,
-            color = EmptyTextGray,
+            color = SoftBlue,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(0.9f)
         )
     }
+}
+
+private fun loadFavoriteRatings(
+    firestore: FirebaseFirestore,
+    currentUserId: String,
+    favorites: List<FavoriteRestaurant>,
+    onLoaded: (Map<String, FavoriteRatingInfo>) -> Unit
+) {
+    if (favorites.isEmpty()) {
+        onLoaded(emptyMap())
+        return
+    }
+
+    firestore.collection("comments")
+        .get()
+        .addOnSuccessListener { documents ->
+            val comments = documents.documents
+            val result = mutableMapOf<String, FavoriteRatingInfo>()
+
+            favorites.forEach { favorite ->
+                val matchedComments = comments.filter { document ->
+                    val commentRestaurantId = document.getString("restaurantId").orEmpty()
+                    val commentRestaurantName = document.getString("restaurantName").orEmpty()
+
+                    val favoritePlaceId = favorite.placeId
+                    val favoriteName = favorite.name
+
+                    commentRestaurantId == favoritePlaceId ||
+                            normalizeText(commentRestaurantName) == normalizeText(favoriteName) ||
+                            normalizeText(commentRestaurantName).contains(normalizeText(favoriteName)) ||
+                            normalizeText(favoriteName).contains(normalizeText(commentRestaurantName))
+                }
+
+                val myRatings = matchedComments
+                    .filter { document ->
+                        document.getString("userId") == currentUserId
+                    }
+                    .mapNotNull { document ->
+                        extractRatingFromComment(document)
+                    }
+
+                val myRating = if (myRatings.isNotEmpty()) {
+                    myRatings.average()
+                } else {
+                    null
+                }
+
+                val othersRatings = matchedComments
+                    .filter { document ->
+                        document.getString("userId") != currentUserId
+                    }
+                    .mapNotNull { document ->
+                        extractRatingFromComment(document)
+                    }
+
+                val othersAverageRating = if (othersRatings.isNotEmpty()) {
+                    othersRatings.average()
+                } else {
+                    null
+                }
+
+                val ratingInfo = FavoriteRatingInfo(
+                    myRating = myRating,
+                    othersAverageRating = othersAverageRating
+                )
+
+                result[favorite.placeId] = ratingInfo
+                result[favorite.name] = ratingInfo
+            }
+
+            onLoaded(result)
+        }
+        .addOnFailureListener {
+            onLoaded(emptyMap())
+        }
+}
+
+private fun extractRatingFromComment(
+    document: DocumentSnapshot
+): Double? {
+    document.getDouble("generalRating")?.let { return it }
+    document.getDouble("rating")?.let { return it }
+
+    val ratingsMap = document.get("ratings") as? Map<*, *>
+    val ratingValues = ratingsMap
+        ?.values
+        ?.mapNotNull { value ->
+            when (value) {
+                is Number -> value.toDouble()
+                else -> null
+            }
+        }
+        .orEmpty()
+
+    return if (ratingValues.isNotEmpty()) {
+        ratingValues.average()
+    } else {
+        null
+    }
+}
+
+private fun formatRating(value: Double?): String {
+    return value?.let {
+        String.format(Locale.US, "%.1f", it)
+    } ?: "-"
+}
+
+private fun normalizeText(value: String): String {
+    return value
+        .lowercase()
+        .replace("ı", "i")
+        .replace("ğ", "g")
+        .replace("ü", "u")
+        .replace("ş", "s")
+        .replace("ö", "o")
+        .replace("ç", "c")
+        .replace(Regex("\\s+"), " ")
+        .trim()
 }
