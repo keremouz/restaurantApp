@@ -120,6 +120,15 @@
     <string name="empty_favorites_description">Favorilere eklediğin restoranlar burada görünecek.</string>
     <string name="empty_favorites_image_desc">Boş favoriler görseli</string>
     <string name="my_favorites">Favorilerim</string>
+    <string name="favorite_restaurant_count">Favori Restoran Sayısı</string>
+    <string name="activity_and_preferences">Aktivite ve Tercihler</string>
+    <string name="account_section">Hesap</string>
+    <string name="unknown_user">Kullanıcı</string>
+    <string name="default_city">İstanbul, Türkiye</string>
 
+    <string name="review_count_text">%1$d değerlendirme</string>
+    <string name="rate_us_subtitle">Görüşlerinizi bizimle paylaşın</string>
+    <string name="current_language_tr">Türkçe (TR)</string>
+    <string name="delete_account_subtitle">Hesabınızı kalıcı olarak silin</string>
 
 </resources>

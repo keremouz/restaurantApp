@@ -52,4 +52,39 @@ object UiConstants {
     val LoginSocialButtonSize = 46.dp
     val LoginSocialIconSize = 22.dp
 
+
+    val AccountHorizontalPadding = 12.dp
+    val AccountBottomPadding = 12.dp
+
+    val AccountProfileMenuSpacing = 18.dp
+    val AccountSectionSpacing = 10.dp
+    val AccountProfileCardRadius = 16.dp
+    val AccountProfileCardPadding = 20.dp
+    val AccountProfileCardElevation = 4.dp
+
+    val AccountAvatarSize = 82.dp
+    val AccountAvatarIconSize = 40.dp
+
+    val AccountEditIconContainerSize = 26.dp
+    val AccountEditIconSize = 15.dp
+
+    val AccountMenuCardRadius = 14.dp
+    val AccountCardElevation = 2.dp
+
+    val AccountMenuItemHorizontalPadding = 14.dp
+    val AccountMenuItemVerticalPadding = 13.dp
+
+    val AccountMenuIconContainerSize = 34.dp
+    val AccountMenuIconSize = 18.dp
+    val AccountMenuIconRadius = 8.dp
+    val AccountChevronIconSize = 18.dp
+
+    val AccountLogoutButtonHeight = 50.dp
+    val AccountLogoutButtonRadius = 10.dp
+    val AccountLogoutIconSize = 18.dp
+
+    val AccountGuestImageSize = 280.dp
+    val AccountOutlinedButtonBorderWidth = 1.dp
+
+    val AccountProfileToMenuBlockSpacing = 40.dp
 }
