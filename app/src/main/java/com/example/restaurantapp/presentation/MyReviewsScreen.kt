@@ -28,6 +28,8 @@ import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -65,7 +67,7 @@ private val ReviewBg = Color(0xFFF7F8FC)
 private val ReviewCardBg = Color(0xFFFFFFFF)
 private val ReviewCardBorder = Color(0xFFE1E6F5)
 
-private val ReviewTitleColor = Color(0xFF173B9F)
+private val ReviewTitleColor = Color(0xFF123A9F)
 private val ReviewBodyColor = Color(0xFF3F4A66)
 private val ReviewMutedColor = Color(0xFF7A8299)
 private val ReviewDividerColor = Color(0xFFE7EAF3)
@@ -77,6 +79,17 @@ private val ReviewGold = Color(0xFF9B6B00)
 private val ReviewGoldSoft = Color(0xFFFFF1C2)
 
 private val ReviewMetaPillBg = Color(0xFFF1F4FA)
+
+private enum class ReviewSortType(val label: String) {
+    NEWEST("En Yeni"),
+    OLDEST("En Eski"),
+    GENERAL("Genel Puan"),
+    TASTE("Lezzet"),
+    SERVICE("Servis"),
+    PRICE_PERFORMANCE("Fiyat / Performans"),
+    ATMOSPHERE("Atmosfer"),
+    LOCATION("Konum")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +103,24 @@ fun MyReviewsScreen(
     var reviews by remember { mutableStateOf<List<UserComment>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    var filterExpanded by remember { mutableStateOf(false) }
+    var selectedSort by remember { mutableStateOf(ReviewSortType.NEWEST) }
+
+    val sortedReviews = remember(reviews, selectedSort) {
+        when (selectedSort) {
+            ReviewSortType.NEWEST -> reviews.sortedByDescending { it.createdAt }
+            ReviewSortType.OLDEST -> reviews.sortedBy { it.createdAt }
+            ReviewSortType.GENERAL -> reviews.sortedByDescending { it.generalRating }
+            ReviewSortType.TASTE -> reviews.sortedByDescending { it.ratings.taste }
+            ReviewSortType.SERVICE -> reviews.sortedByDescending { it.ratings.service }
+            ReviewSortType.PRICE_PERFORMANCE -> reviews.sortedByDescending {
+                it.ratings.pricePerformance
+            }
+            ReviewSortType.ATMOSPHERE -> reviews.sortedByDescending { it.ratings.atmosphere }
+            ReviewSortType.LOCATION -> reviews.sortedByDescending { it.ratings.location }
+        }
+    }
 
     DisposableEffect(Unit) {
         val listener = FirebaseAuth.AuthStateListener { auth ->
@@ -205,11 +236,25 @@ fun MyReviewsScreen(
                     verticalArrangement = Arrangement.spacedBy(UiConstants.MediumSpacing)
                 ) {
                     item {
-                        ReviewsHeader(reviewCount = reviews.size)
+                        ReviewsHeader(
+                            reviewCount = sortedReviews.size,
+                            selectedSort = selectedSort,
+                            filterExpanded = filterExpanded,
+                            onFilterClick = {
+                                filterExpanded = true
+                            },
+                            onDismissFilter = {
+                                filterExpanded = false
+                            },
+                            onSortSelected = { sortType ->
+                                selectedSort = sortType
+                                filterExpanded = false
+                            }
+                        )
                     }
 
                     items(
-                        items = reviews,
+                        items = sortedReviews,
                         key = { it.commentId }
                     ) { review ->
                         ReviewArchiveCard(review = review)
@@ -222,7 +267,12 @@ fun MyReviewsScreen(
 
 @Composable
 private fun ReviewsHeader(
-    reviewCount: Int
+    reviewCount: Int,
+    selectedSort: ReviewSortType,
+    filterExpanded: Boolean,
+    onFilterClick: () -> Unit,
+    onDismissFilter: () -> Unit,
+    onSortSelected: (ReviewSortType) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -230,18 +280,73 @@ private fun ReviewsHeader(
             .padding(bottom = UiConstants.SmallSpacing),
         verticalArrangement = Arrangement.spacedBy(UiConstants.TinySpacing)
     ) {
-        Text(
-            text = "Deneyimleriniz.",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = ReviewTitleColor
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.TinySpacing)
+            ) {
+                Text(
+                    text = "Deneyimleriniz.",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = ReviewTitleColor
+                )
 
-        Text(
-            text = "Toplam $reviewCount inceleme paylaştınız.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = ReviewMutedColor
-        )
+                Text(
+                    text = "Toplam $reviewCount inceleme paylaştınız.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ReviewMutedColor
+                )
+            }
+
+            Box(
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Text(
+                    text = "Sırala: ${selectedSort.label}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = ReviewBlue,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable { onFilterClick() }
+                        .padding(
+                            horizontal = UiConstants.PillHorizontalPadding,
+                            vertical = UiConstants.SmallPillVerticalPadding
+                        )
+                )
+
+                DropdownMenu(
+                    expanded = filterExpanded,
+                    onDismissRequest = onDismissFilter
+                ) {
+                    ReviewSortType.values().forEach { sortType ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = sortType.label,
+                                    color = if (selectedSort == sortType) {
+                                        ReviewTitleColor
+                                    } else {
+                                        ReviewBodyColor
+                                    },
+                                    fontWeight = if (selectedSort == sortType) {
+                                        FontWeight.Bold
+                                    } else {
+                                        FontWeight.Normal
+                                    }
+                                )
+                            },
+                            onClick = {
+                                onSortSelected(sortType)
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
