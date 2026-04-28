@@ -35,10 +35,8 @@ object UiConstants {
     val BottomBarOuterHorizontalPadding = 16.dp
     val BottomBarOuterTopPadding = 8.dp
     val BottomBarOuterBottomPadding = 12.dp
-
     val BottomBarInnerHorizontalPadding = 24.dp
     val BottomBarInnerVerticalPadding = 12.dp
-
     val BottomBarCornerRadius = 16.dp
     val BottomBarIconSize = 22.dp
     val BottomBarItemCircleSize = 36.dp
@@ -47,50 +45,39 @@ object UiConstants {
     val LoginTopSpacing = 18.dp
     val LoginFieldSpacing = 18.dp
     val LoginBottomSpacing = 22.dp
-
     val LoginButtonHeight = 56.dp
     val LoginButtonRadius = 30.dp
-
     val LoginSocialButtonSize = 46.dp
     val LoginSocialIconSize = 22.dp
     val LoginSocialButtonBorderWidth = 1.dp
 
     // Account screen - layout
-    val AccountHorizontalPadding = 12.dp
+    val AccountHorizontalPadding = 24.dp
     val AccountBottomPadding = 12.dp
-    val AccountTitleTopPadding = 8.dp
-    val AccountTitleBottomSpacing = 16.dp
-    val AccountSectionSpacing = 10.dp
+    val AccountTitleTopPadding = 4.dp
+    val AccountTitleBottomSpacing = 18.dp
     val AccountProfileToMenuBlockSpacing = 28.dp
+    val AccountSectionSpacing = 10.dp
+    val AccountInfoCardRadius = 18.dp
+    val AccountInfoCardPadding = 16.dp
 
-    // Account screen - profile card
-    val AccountProfileCardRadius = 16.dp
-    val AccountProfileCardPadding = 22.dp
-    val AccountProfileCardElevation = 4.dp
-
-    val AccountAvatarSize = 82.dp
+    // Account screen - profile header
+    val AccountAvatarSize = 86.dp
     val AccountAvatarIconSize = 42.dp
-
-    val AccountEditIconContainerSize = 26.dp
+    val AccountEditIconContainerSize = 28.dp
     val AccountEditIconSize = 15.dp
 
-    // Account screen - menu cards
-    val AccountMenuCardRadius = 14.dp
-    val AccountCardElevation = 2.dp
+    // Account screen - menu list
+    val AccountMenuCardRadius = 24.dp
+    val AccountCardElevation = 0.dp
+    val AccountMenuItemHorizontalPadding = 22.dp
+    val AccountMenuItemVerticalPadding = 14.dp
+    val AccountMenuIconContainerSize = 36.dp
+    val AccountMenuIconSize = 19.dp
+    val AccountMenuIconRadius = 999.dp
+    val AccountChevronIconSize = 20.dp
 
-    val AccountMenuItemHorizontalPadding = 14.dp
-    val AccountMenuItemVerticalPadding = 13.dp
-
-    val AccountMenuIconContainerSize = 34.dp
-    val AccountMenuIconSize = 18.dp
-    val AccountMenuIconRadius = 8.dp
-    val AccountChevronIconSize = 18.dp
-
-    // Account screen - buttons and guest
-    val AccountLogoutButtonHeight = 50.dp
-    val AccountLogoutButtonRadius = 10.dp
-    val AccountLogoutIconSize = 18.dp
-
+    // Account screen - guest
     val AccountGuestImageSize = 280.dp
     val AccountOutlinedButtonBorderWidth = 1.dp
 

@@ -133,4 +133,17 @@
     <string name="review_count_short">Değerlendirme</string>
     <string name="favorite_count_short">Favori</string>
     <string name="average_rating_short">Ortalama</string>
+    <string name="logout_subtitle">Oturumu kapat</string>
+    <string name="account_level_title">Üyelik Seviyesi</string>
+    <string name="account_level_description">%1$d değerlendirme ile seviye kazandınız</string>
+
+    <string name="review_count_profile">Değerlendirme</string>
+    <string name="favorite_count_profile">Favori</string>
+
+    <string name="level_new_member">Yeni Üye</string>
+    <string name="level_explorer">Gezgin</string>
+    <string name="level_taste_hunter">Mekan Kaşifi</string>
+    <string name="level_gourmet">Gurme</string>
+    <string name="level_restaurant_expert">Restoran Uzmanı</string>
+
 </resources>
