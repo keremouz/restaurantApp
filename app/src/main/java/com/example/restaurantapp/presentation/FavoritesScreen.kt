@@ -61,6 +61,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
+import androidx.compose.material3.HorizontalDivider
 
 private val FavoritesBg = Color(0xFFF7F7FB)
 private val FavoriteItemBg = Color(0xFFEFF4FF)
@@ -309,7 +310,6 @@ private fun FavoritesContent(
         }
     }
 }
-
 @Composable
 private fun FavoriteItemCard(
     favorite: FavoriteRestaurant,
@@ -332,7 +332,7 @@ private fun FavoriteItemCard(
                 .fillMaxWidth()
                 .padding(
                     horizontal = UiConstants.ContentSpacing,
-                    vertical = UiConstants.MediumSpacing
+                    vertical = UiConstants.ContentSpacing
                 )
         ) {
             Text(
@@ -350,35 +350,60 @@ private fun FavoriteItemCard(
                 text = favorite.address,
                 style = MaterialTheme.typography.bodySmall,
                 color = SoftBlue,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
+            Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
+
+            HorizontalDivider(
+                color = FavoriteCardBorder
+            )
+
+            Spacer(modifier = Modifier.height(UiConstants.MediumSpacing))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Benim Puanım: ${formatRating(ratingInfo.myRating)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = FavoriteBlue,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+                RatingInfoBlock(
+                    title = "Benim Puanım",
+                    value = formatRating(ratingInfo.myRating),
                     modifier = Modifier.weight(1f)
                 )
 
-                Text(
-                    text = "Genel: ${formatRating(ratingInfo.othersAverageRating)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = FavoriteBlue,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                RatingInfoBlock(
+                    title = "Genel Puan",
+                    value = formatRating(ratingInfo.othersAverageRating),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
+    }
+}
+@Composable
+private fun RatingInfoBlock(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            color = SoftBlue,
+            fontWeight = FontWeight.Medium
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            color = FavoriteBlue,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
