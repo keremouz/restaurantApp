@@ -46,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -320,12 +319,17 @@ private fun FavoriteItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(UiConstants.FavoriteCardRadius),
         colors = CardDefaults.cardColors(
             containerColor = FavoriteItemBg
         ),
-        border = BorderStroke(1.dp, FavoriteCardBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        border = BorderStroke(
+            width = UiConstants.FavoriteCardBorderWidth,
+            color = FavoriteCardBorder
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = UiConstants.FavoriteCardElevation
+        )
     ) {
         Column(
             modifier = Modifier
@@ -421,7 +425,7 @@ private fun FavoritesLoginRequiredContent(
         Image(
             painter = painterResource(id = R.drawable.img_empty_favorites),
             contentDescription = stringResource(R.string.empty_favorites_image_desc),
-            modifier = Modifier.size(450.dp),
+            modifier = Modifier.size(UiConstants.EmptyFavoritesImageSize),
             contentScale = ContentScale.Fit
         )
 
@@ -460,7 +464,7 @@ private fun EmptyFavoritesContent(
         Image(
             painter = painterResource(id = R.drawable.img_empty_favorites),
             contentDescription = stringResource(R.string.empty_favorites_image_desc),
-            modifier = Modifier.size(450.dp),
+            modifier = Modifier.size(UiConstants.EmptyFavoritesImageSize),
             contentScale = ContentScale.Fit
         )
 

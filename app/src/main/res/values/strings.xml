@@ -130,5 +130,7 @@
     <string name="rate_us_subtitle">Görüşlerinizi bizimle paylaşın</string>
     <string name="current_language_tr">Türkçe (TR)</string>
     <string name="delete_account_subtitle">Hesabınızı kalıcı olarak silin</string>
-
+    <string name="review_count_short">Değerlendirme</string>
+    <string name="favorite_count_short">Favori</string>
+    <string name="average_rating_short">Ortalama</string>
 </resources>

@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.CommentsManager
@@ -363,8 +362,13 @@ private fun ReviewArchiveCard(
             .clickable { isExpanded = !isExpanded },
         shape = RoundedCornerShape(UiConstants.CardRadius),
         colors = CardDefaults.cardColors(containerColor = ReviewCardBg),
-        border = BorderStroke(1.dp, ReviewCardBorder),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        border = BorderStroke(
+            width = UiConstants.ReviewCardBorderWidth,
+            color = ReviewCardBorder
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = UiConstants.ReviewCardElevation
+        )
     ) {
         Column(
             modifier = Modifier

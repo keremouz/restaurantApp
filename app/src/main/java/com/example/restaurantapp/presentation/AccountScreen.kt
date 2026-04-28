@@ -16,10 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
@@ -33,7 +31,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -133,20 +130,7 @@ fun AccountScreen(
 
     Scaffold(
         containerColor = AccountBg,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            if (currentUser != null) {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(R.string.profile_title),
-                            color = TextPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                )
-            }
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         when {
             !isConnected -> {
@@ -192,6 +176,7 @@ private fun LoggedInAccountContent(
     onDeleteAccountClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -203,9 +188,22 @@ private fun LoggedInAccountContent(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
+            Text(
+                text = stringResource(R.string.profile_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = UiConstants.AccountTitleTopPadding),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(UiConstants.AccountTitleBottomSpacing))
             ProfileCard(
                 fullName = fullName,
                 email = email
+
             )
 
             Spacer(modifier = Modifier.height(UiConstants.AccountProfileToMenuBlockSpacing))
@@ -387,6 +385,7 @@ private fun GuestAccountContent(
             Spacer(modifier = Modifier.height(UiConstants.LargeSpacing))
         }
     }
+
 }
 
 @Composable
@@ -398,7 +397,9 @@ private fun ProfileCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(UiConstants.AccountProfileCardRadius),
         colors = CardDefaults.cardColors(containerColor = AccountBlue),
-        elevation = CardDefaults.cardElevation(defaultElevation = UiConstants.AccountProfileCardElevation)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = UiConstants.AccountProfileCardElevation
+        )
     ) {
         Column(
             modifier = Modifier
@@ -453,7 +454,6 @@ private fun ProfileCard(
         }
     }
 }
-
 @Composable
 private fun AccountMenuItem(
     icon: ImageVector,

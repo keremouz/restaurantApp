@@ -194,8 +194,8 @@ fun RestaurantDetailScreen(
                 onValueChange = { commentText = it },
                 label = { Text(stringResource(R.string.comment_label)) },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = UiConstants.CommentFieldMinLines,
-                maxLines = UiConstants.CommentFieldMinLines + 2
+                minLines = UiConstants.COMMENT_FIELD_MIN_LINES,
+                maxLines = UiConstants.COMMENT_FIELD_MIN_LINES + 2,
             )
 
             OutlinedButton(

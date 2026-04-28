@@ -51,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
@@ -391,7 +390,7 @@ private fun GoogleCircleButton(
             .size(UiConstants.LoginSocialButtonSize)
             .background(Color.White, CircleShape)
             .border(
-                width = 1.dp,
+                width = UiConstants.LoginSocialButtonBorderWidth,
                 color = DividerGray,
                 shape = CircleShape
             )
