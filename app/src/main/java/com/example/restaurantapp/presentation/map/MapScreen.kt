@@ -5,15 +5,26 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,18 +32,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.BuildConfig
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.di.RetrofitProvider
+import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
 import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -40,7 +55,11 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val MapTopBarBg = Color(0xFFF5F8FF)
+private val MapTitleColor = Color(0xFF2F5BFF)
+private val MapSubtitleColor = Color(0xFF6E8BFF)
+private val MapIconBg = Color(0xFFDCE6FF)
+private val MapIconBlue = Color(0xFF2F5BFF)
 @Composable
 fun MapScreen(
     isConnected: Boolean,
@@ -81,12 +100,9 @@ fun MapScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.map_title))
-                }
-            )
+            MapTopBar()
         }
     ) { paddingValues ->
         when {
@@ -104,7 +120,10 @@ fun MapScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        color = MapIconBlue,
+                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth
+                    )
                 }
             }
 
@@ -116,7 +135,8 @@ fun MapScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "${stringResource(R.string.map_error_prefix)} ${uiState.errorMessage}"
+                        text = "${stringResource(R.string.map_error_prefix)} ${uiState.errorMessage}",
+                        color = MapTitleColor
                     )
                 }
             }
@@ -128,7 +148,10 @@ fun MapScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = stringResource(R.string.map_empty))
+                    Text(
+                        text = stringResource(R.string.map_empty),
+                        color = MapTitleColor
+                    )
                 }
             }
 
@@ -157,6 +180,60 @@ fun MapScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MapTopBar() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MapTopBarBg,
+        shadowElevation = UiConstants.MapTopBarElevation
+    ){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = UiConstants.ScreenPadding,
+                    vertical = UiConstants.MapTopBarVerticalPadding
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
+            ) {
+                Text(
+                    text = stringResource(R.string.map_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MapTitleColor
+                )
+
+                Text(
+                    text = stringResource(R.string.map_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MapSubtitleColor
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(UiConstants.MapTopBarIconContainerSize)
+                    .background(
+                        color = MapIconBg,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Restaurant,
+                    contentDescription = null,
+                    tint = MapIconBlue,
+                    modifier = Modifier.size(UiConstants.MapTopBarIconSize)
+                )
             }
         }
     }
@@ -201,7 +278,7 @@ private fun bitmapDescriptorFromVectorOrNull(
 
         vectorDrawable.draw(canvas)
 
-        com.google.android.gms.maps.model.BitmapDescriptorFactory.fromBitmap(bitmap)
+        BitmapDescriptorFactory.fromBitmap(bitmap)
     } catch (exception: Exception) {
         Log.e("MapScreen", "Marker icon could not be created", exception)
         null

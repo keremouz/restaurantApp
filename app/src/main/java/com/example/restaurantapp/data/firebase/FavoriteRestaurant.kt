@@ -1,5 +1,8 @@
 package com.example.restaurantapp.data.firebase
 
+import androidx.annotation.Keep
+
+@Keep
 data class FavoriteRestaurant(
     val placeId: String = "",
     val name: String = "",

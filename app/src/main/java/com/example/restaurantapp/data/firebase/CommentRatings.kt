@@ -1,5 +1,9 @@
 package com.example.restaurantapp.data.firebase
 
+import androidx.annotation.Keep
+
+
+@Keep
 data class CommentRatings(
     val taste: Int = 0,
     val service: Int = 0,

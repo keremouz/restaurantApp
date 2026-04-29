@@ -97,4 +97,10 @@ object UiConstants {
     val SmallIconSize = 14.dp
     val ReviewCardBorderWidth = 1.dp
     val ReviewCardElevation = 0.dp
+
+    // Map screen
+    val MapTopBarVerticalPadding = 14.dp
+    val MapTopBarElevation = 2.dp
+    val MapTopBarIconContainerSize = 42.dp
+    val MapTopBarIconSize = 22.dp
 }

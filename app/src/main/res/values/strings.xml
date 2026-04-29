@@ -145,5 +145,6 @@
     <string name="level_taste_hunter">Mekan Kaşifi</string>
     <string name="level_gourmet">Gurme</string>
     <string name="level_restaurant_expert">Restoran Uzmanı</string>
+    <string name="map_subtitle">Yakındaki restoranları keşfet</string>
 
 </resources>
