@@ -1,6 +1,7 @@
 package com.example.restaurantapp.data.remote.api
 
 import com.example.restaurantapp.data.remote.dto.NearbySearchRequestDto
+import com.example.restaurantapp.data.remote.dto.PlacesTextSearchRequestDto
 import com.example.restaurantapp.data.remote.dto.PlacesTextSearchResponseDto
 import retrofit2.http.Body
 import retrofit2.http.Header
@@ -13,5 +14,12 @@ interface PlacesApiService {
         @Header("X-Goog-Api-Key") apiKey: String,
         @Header("X-Goog-FieldMask") fieldMask: String,
         @Body request: NearbySearchRequestDto
+    ): PlacesTextSearchResponseDto
+
+    @POST("v1/places:searchText")
+    suspend fun searchTextRestaurants(
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Header("X-Goog-FieldMask") fieldMask: String,
+        @Body request: PlacesTextSearchRequestDto
     ): PlacesTextSearchResponseDto
 }

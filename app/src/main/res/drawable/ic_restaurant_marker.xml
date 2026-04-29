@@ -1,0 +1,40 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="34dp"
+    android:viewportWidth="38"
+    android:viewportHeight="44">
+
+    <!-- Shadow -->
+    <path
+        android:fillColor="#26000000"
+        android:pathData="M20,44C24.6,44 28.2,42.8 28.2,41.4C28.2,40 24.6,39 20,39C15.4,39 11.8,40 11.8,41.4C11.8,42.8 15.4,44 20,44Z" />
+
+    <!-- Marker body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M20,2C10.6,2 3,9.6 3,19C3,31.5 20,42 20,42C20,42 37,31.5 37,19C37,9.6 29.4,2 20,2Z" />
+
+    <!-- Inner circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M20,8C13.9,8 9,12.9 9,19C9,25.1 13.9,30 20,30C26.1,30 31,25.1 31,19C31,12.9 26.1,8 20,8Z" />
+
+    <!-- Fork head -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M14,13H19C19.6,13 20,13.4 20,14V18C20,19.9 18.9,21.3 17.5,21.7V26C17.5,26.6 17.1,27 16.5,27C15.9,27 15.5,26.6 15.5,26V21.7C14.1,21.3 13,19.9 13,18V14C13,13.4 13.4,13 14,13Z" />
+
+    <!-- Fork gaps -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M15,13H15.8V17.5H15V13Z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M17.2,13H18V17.5H17.2V13Z" />
+
+    <!-- Spoon -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M25,13C26.7,13 28,15.2 28,18C28,20.2 27.2,22 26,22.7V26C26,26.6 25.6,27 25,27C24.4,27 24,26.6 24,26V22.7C22.8,22 22,20.2 22,18C22,15.2 23.3,13 25,13Z" />
+</vector>
