@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,19 +19,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
+import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
-import androidx.compose.ui.res.painterResource
-import com.example.restaurantapp.R
-
 
 private val BottomBarBlue = Color(0xFF2F5BFF)
 private val BottomBarSelectedIcon = Color.White
@@ -42,7 +43,7 @@ fun MainBottomBarScreen(
     isConnected: Boolean,
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onRestaurantClick: (com.example.restaurantapp.domain.model.Restaurant) -> Unit,
+    onRestaurantClick: (Restaurant) -> Unit,
     onNavigateToMyReviews: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
@@ -71,17 +72,18 @@ fun MainBottomBarScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(UiConstants.BottomBarWidthFraction)
+                    .height(UiConstants.BottomBarHeight),
                     shape = RoundedCornerShape(UiConstants.BottomBarCornerRadius),
                     color = BottomBarBlue,
-                    shadowElevation = UiConstants.CardElevation * 2
+                    shadowElevation = UiConstants.BottomBarElevation
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
-                                horizontal = UiConstants.BottomBarInnerHorizontalPadding,
-                                vertical = UiConstants.BottomBarInnerVerticalPadding
+                                horizontal = UiConstants.BottomBarInnerHorizontalPadding
                             ),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -91,53 +93,19 @@ fun MainBottomBarScreen(
                                 destination.route == item.route
                             } == true
 
-                            Box(
-                                modifier = Modifier
-                                    .size(UiConstants.BottomBarItemCircleSize)
-                                    .background(
-                                        color = if (selected) BottomBarSelectedBg else Color.Transparent,
-                                        shape = CircleShape
-                                    )
-                                    .clickable {
-                                        bottomNavController.navigate(item.route) {
-                                            popUpTo(bottomNavController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                            restoreState = true
+                            BottomBarItem(
+                                item = item,
+                                selected = selected,
+                                onClick = {
+                                    bottomNavController.navigate(item.route) {
+                                        popUpTo(bottomNavController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                when (item.route) {
-                                    Routes.MAP -> {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_bottom_home),
-                                            contentDescription = null,
-                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
-                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
-                                        )
-                                    }
-
-                                    Routes.ACCOUNT -> {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_bottom_profile),
-                                            contentDescription = null,
-                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
-                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
-                                        )
-                                    }
-
-                                    else -> {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = null,
-                                            tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
-                                            modifier = Modifier.size(UiConstants.BottomBarIconSize)
-                                        )
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
                                 }
-                            }
+                            )
                         }
                     }
                 }
@@ -172,6 +140,53 @@ fun MainBottomBarScreen(
                     onRateAppClick = {},
                     onLanguageClick = {},
                     onDeleteAccountClick = {}
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomBarItem(
+    item: BottomNavItem,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(UiConstants.BottomBarItemCircleSize)
+            .background(
+                color = if (selected) BottomBarSelectedBg else Color.Transparent,
+                shape = CircleShape
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        when (item.route) {
+            Routes.MAP -> {
+                Icon(
+                    painter = painterResource(R.drawable.ic_bottom_home),
+                    contentDescription = null,
+                    tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                    modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                )
+            }
+
+            Routes.ACCOUNT -> {
+                Icon(
+                    painter = painterResource(R.drawable.ic_bottom_profile),
+                    contentDescription = null,
+                    tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                    modifier = Modifier.size(UiConstants.BottomBarIconSize)
+                )
+            }
+
+            else -> {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
+                    modifier = Modifier.size(UiConstants.BottomBarIconSize)
                 )
             }
         }

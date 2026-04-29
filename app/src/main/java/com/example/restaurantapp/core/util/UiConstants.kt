@@ -32,14 +32,19 @@ object UiConstants {
     val PillRadius = 999.dp
 
     // Bottom bar
-    val BottomBarOuterHorizontalPadding = 16.dp
-    val BottomBarOuterTopPadding = 8.dp
-    val BottomBarOuterBottomPadding = 12.dp
-    val BottomBarInnerHorizontalPadding = 24.dp
-    val BottomBarInnerVerticalPadding = 12.dp
-    val BottomBarCornerRadius = 16.dp
-    val BottomBarIconSize = 22.dp
+    val BottomBarOuterHorizontalPadding = 0.dp
+    val BottomBarOuterTopPadding = 6.dp
+    val BottomBarOuterBottomPadding = 10.dp
+
+    val BottomBarInnerHorizontalPadding = 28.dp
+
+    val BottomBarHeight = 54.dp
+    val BottomBarCornerRadius = 18.dp
+    val BottomBarIconSize = 21.dp
     val BottomBarItemCircleSize = 36.dp
+    val BottomBarElevation = 8.dp
+
+    const val BottomBarWidthFraction = 0.80f
 
     // Auth screens
     val LoginTopSpacing = 18.dp
