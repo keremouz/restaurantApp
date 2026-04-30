@@ -1,0 +1,47 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="36dp"
+    android:viewportWidth="38"
+    android:viewportHeight="44">
+
+    <!-- Shadow -->
+    <path
+        android:fillColor="#18000000"
+        android:pathData="M19,42.2C24,42.2 28.1,41 28.1,39.5C28.1,38 24,36.8 19,36.8C14,36.8 9.9,38 9.9,39.5C9.9,41 14,42.2 19,42.2Z" />
+
+    <!-- Marker body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M19,2C10.2,2 3,9.2 3,18C3,29.4 19,41 19,41C19,41 35,29.4 35,18C35,9.2 27.8,2 19,2Z" />
+
+    <!-- Inner white circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,8.5C13.8,8.5 9.5,12.8 9.5,18C9.5,23.2 13.8,27.5 19,27.5C24.2,27.5 28.5,23.2 28.5,18C28.5,12.8 24.2,8.5 19,8.5Z" />
+
+    <!-- Main leaf -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M23.8,12.2C19.7,12.3 15.3,14.4 13.6,18.2C12.2,21.4 14.2,24.4 17.4,24.4C21.2,24.4 24.2,21.3 24.6,17.2C24.8,15.3 24.4,13.6 23.8,12.2Z" />
+
+    <!-- Leaf cut / shine -->
+    <path
+        android:fillColor="#8FB1FF"
+        android:pathData="M15.4,21.7C17.5,18.8 19.6,16.9 23.2,14.4C21.9,17.5 19.6,20.4 15.4,21.7Z" />
+
+    <!-- Leaf vein -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.75"
+        android:pathData="M15.2,22.6C17.1,19.4 19.8,16.7 23.3,14.5L24,15.5C20.7,17.6 18.2,20.1 16.2,23.1Z" />
+
+    <!-- Stem -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M17.8,23.1H19.4V27.2H17.8Z" />
+
+    <!-- Small base -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M15.2,26.7H22.8C23.5,26.7 24.1,27.3 24.1,28C24.1,28.7 23.5,29.3 22.8,29.3H15.2C14.5,29.3 13.9,28.7 13.9,28C13.9,27.3 14.5,26.7 15.2,26.7Z" />
+</vector>

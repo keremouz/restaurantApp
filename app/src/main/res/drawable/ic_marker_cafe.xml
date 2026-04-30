@@ -1,0 +1,56 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="36dp"
+    android:viewportWidth="38"
+    android:viewportHeight="44">
+
+    <!-- Shadow -->
+    <path
+        android:fillColor="#18000000"
+        android:pathData="M19,42.2C24,42.2 28.1,41 28.1,39.5C28.1,38 24,36.8 19,36.8C14,36.8 9.9,38 9.9,39.5C9.9,41 14,42.2 19,42.2Z" />
+
+    <!-- Marker body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M19,2C10.2,2 3,9.2 3,18C3,29.4 19,41 19,41C19,41 35,29.4 35,18C35,9.2 27.8,2 19,2Z" />
+
+    <!-- Inner white circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,8.5C13.8,8.5 9.5,12.8 9.5,18C9.5,23.2 13.8,27.5 19,27.5C24.2,27.5 28.5,23.2 28.5,18C28.5,12.8 24.2,8.5 19,8.5Z" />
+
+    <!-- Cup body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M13.2,16.2H22.8C23.5,16.2 24,16.7 24,17.4V21.5C24,24 22,26 19.5,26H16.5C14,26 12,24 12,21.5V17.4C12,16.7 12.5,16.2 13.2,16.2Z" />
+
+    <!-- Cup inner highlight -->
+    <path
+        android:fillColor="#8FB1FF"
+        android:pathData="M14,17.5H22V18.8H14Z" />
+
+    <!-- Cup handle -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M23.7,18H25.7C27.1,18 28.1,19.1 28.1,20.5C28.1,21.9 27.1,23 25.7,23H23.7V21.5H25.6C26.2,21.5 26.6,21.1 26.6,20.5C26.6,19.9 26.2,19.5 25.6,19.5H23.7Z" />
+
+    <!-- Steam 1 -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M15.5,10.9C14.8,11.7 14.8,12.7 15.5,13.5C15.9,13.9 16.5,13.4 16.1,12.9C15.8,12.5 15.8,12.1 16.1,11.7C16.5,11.2 15.9,10.5 15.5,10.9Z" />
+
+    <!-- Steam 2 -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M18.7,10.4C18,11.3 18,12.5 18.7,13.4C19.1,13.9 19.8,13.4 19.4,12.9C19.1,12.4 19.1,11.9 19.4,11.4C19.8,10.8 19.1,9.9 18.7,10.4Z" />
+
+    <!-- Steam 3 -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M21.8,10.9C21.1,11.7 21.1,12.7 21.8,13.5C22.2,13.9 22.8,13.4 22.4,12.9C22.1,12.5 22.1,12.1 22.4,11.7C22.8,11.2 22.2,10.5 21.8,10.9Z" />
+
+    <!-- Saucer -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M13.2,26.4H24.8C25.5,26.4 26.1,27 26.1,27.7C26.1,28.4 25.5,29 24.8,29H13.2C12.5,29 11.9,28.4 11.9,27.7C11.9,27 12.5,26.4 13.2,26.4Z" />
+</vector>

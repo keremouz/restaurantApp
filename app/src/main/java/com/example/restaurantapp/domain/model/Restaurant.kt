@@ -9,5 +9,6 @@ data class Restaurant(
     val longitude: Double,
     val address: String,
     val district: String? = null,
-    val rating: Double? = null
+    val rating: Double? = null,
+    val category: String = "restaurant"
 ) : Serializable

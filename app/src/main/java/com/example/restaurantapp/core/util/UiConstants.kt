@@ -103,6 +103,9 @@ object UiConstants {
     val MapTopBarElevation = 2.dp
     val MapTopBarIconContainerSize = 42.dp
     val MapTopBarIconSize = 22.dp
+    val MapClusterItemSize = 30.dp
+    val MapClusterSize = 42.dp
+    val MapCategoryBottomPadding = 12.dp
 
     // Review detail screen
     val ReviewStarSize = 22.dp

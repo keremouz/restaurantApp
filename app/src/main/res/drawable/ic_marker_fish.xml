@@ -1,0 +1,46 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="36dp"
+    android:viewportWidth="38"
+    android:viewportHeight="44">
+
+    <!-- Shadow -->
+    <path
+        android:fillColor="#18000000"
+        android:pathData="M19,42.2C24,42.2 28.1,41 28.1,39.5C28.1,38 24,36.8 19,36.8C14,36.8 9.9,38 9.9,39.5C9.9,41 14,42.2 19,42.2Z" />
+
+    <!-- Marker body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M19,2C10.2,2 3,9.2 3,18C3,29.4 19,41 19,41C19,41 35,29.4 35,18C35,9.2 27.8,2 19,2Z" />
+
+    <!-- Inner white circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M19,8.5C13.8,8.5 9.5,12.8 9.5,18C9.5,23.2 13.8,27.5 19,27.5C24.2,27.5 28.5,23.2 28.5,18C28.5,12.8 24.2,8.5 19,8.5Z" />
+
+    <!-- Fish body -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M13.2,18C14.8,15.4 17.1,14.1 20,14.1C22.7,14.1 24.8,15.5 26.2,18C24.8,20.5 22.7,21.9 20,21.9C17.1,21.9 14.8,20.6 13.2,18Z" />
+
+    <!-- Fish tail -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M12.8,18L9.8,15.3V20.7Z" />
+
+    <!-- Fish eye -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M23.2,16.7C23.8,16.7 24.2,17.1 24.2,17.7C24.2,18.3 23.8,18.7 23.2,18.7C22.6,18.7 22.2,18.3 22.2,17.7C22.2,17.1 22.6,16.7 23.2,16.7Z" />
+
+    <!-- Gill line -->
+    <path
+        android:fillColor="#8FB1FF"
+        android:pathData="M19.2,15.2C18.5,16 18.2,16.9 18.2,18C18.2,19.1 18.5,20 19.2,20.8C18.1,20.4 17.4,19.3 17.4,18C17.4,16.7 18.1,15.6 19.2,15.2Z" />
+
+    <!-- Bottom wave / plate style -->
+    <path
+        android:fillColor="#2F5BFF"
+        android:pathData="M13.5,25.4C15.1,24.4 16.7,24.4 18.4,25.4C20.1,26.4 21.7,26.4 23.5,25.4C24,25.1 24.6,25.3 24.9,25.8C25.2,26.3 25,26.9 24.5,27.2C22.2,28.6 19.9,28.6 17.4,27.2C16.4,26.6 15.5,26.6 14.5,27.2C14,27.5 13.4,27.3 13.1,26.8C12.8,26.3 13,25.7 13.5,25.4Z" />
+</vector>

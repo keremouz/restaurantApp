@@ -1,11 +1,9 @@
 package com.example.restaurantapp.presentation.map
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.util.Log
-import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,14 +30,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.BuildConfig
 import com.example.restaurantapp.R
@@ -45,21 +47,38 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
-import com.google.android.gms.maps.MapsInitializer
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
+
+private const val CATEGORY_ALL = "all"
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
 private val MapSubtitleColor = Color(0xFF6E8BFF)
 private val MapIconBg = Color(0xFFDCE6FF)
 private val MapIconBlue = Color(0xFF2F5BFF)
+
+private val MapCategories = listOf(
+    MapCategory(CATEGORY_ALL, "Tümü", Color(0xFF2F5BFF)),
+    MapCategory("restaurant", "Restoran", Color(0xFF5E6CE7)),
+    MapCategory("doner", "Döner", Color(0xFFFF7043)),
+    MapCategory("fish", "Balık", Color(0xFF00A6D6)),
+    MapCategory("burger", "Burger", Color(0xFFFFB300)),
+    MapCategory("kebab", "Kebap", Color(0xFFD84315)),
+    MapCategory("pide", "Pide", Color(0xFFFF8A65)),
+    MapCategory("breakfast", "Kahvaltı", Color(0xFF43A047)),
+    MapCategory("dessert", "Tatlı", Color(0xFFE91E63)),
+    MapCategory("cafe", "Kafe", Color(0xFF8D6E63)),
+    MapCategory("steak", "Steak", Color(0xFF795548)),
+    MapCategory("pizza", "Pizza", Color(0xFFEF5350)),
+    MapCategory("sushi", "Sushi", Color(0xFF26A69A)),
+    MapCategory("meyhane", "Meyhane", Color(0xFF7E57C2))
+)
+
 @Composable
 fun MapScreen(
     isConnected: Boolean,
@@ -80,17 +99,28 @@ fun MapScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    var selectedCategory by remember {
+        mutableStateOf(CATEGORY_ALL)
+    }
+
     LaunchedEffect(isConnected) {
         viewModel.updateConnectionState(isConnected)
     }
 
-    val context = LocalContext.current
+    val filteredRestaurants = remember(uiState.restaurants, selectedCategory) {
+        if (selectedCategory == CATEGORY_ALL) {
+            uiState.restaurants
+        } else {
+            uiState.restaurants.filter { restaurant ->
+                restaurant.category == selectedCategory
+            }
+        }
+    }
 
-    val restaurantMarkerIcon = remember(context) {
-        bitmapDescriptorFromVectorOrNull(
-            context = context,
-            vectorResId = R.drawable.ic_restaurant_marker
-        )
+    val clusterItems = remember(filteredRestaurants) {
+        filteredRestaurants.map { restaurant ->
+            RestaurantClusterItem(restaurant)
+        }
     }
 
     val istanbul = LatLng(41.0082, 28.9784)
@@ -102,7 +132,12 @@ fun MapScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            MapTopBar()
+            MapTopBar(
+                selectedCategory = selectedCategory,
+                onCategorySelected = { category ->
+                    selectedCategory = category
+                }
+            )
         }
     ) { paddingValues ->
         when {
@@ -155,6 +190,20 @@ fun MapScreen(
                 }
             }
 
+            filteredRestaurants.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.map_category_empty),
+                        color = MapTitleColor
+                    )
+                }
+            }
+
             else -> {
                 GoogleMap(
                     modifier = Modifier
@@ -162,23 +211,36 @@ fun MapScreen(
                         .padding(paddingValues),
                     cameraPositionState = cameraPositionState
                 ) {
-                    uiState.restaurants.forEach { restaurant ->
-                        Marker(
-                            state = MarkerState(
-                                position = LatLng(
-                                    restaurant.latitude,
-                                    restaurant.longitude
+                    Clustering(
+                        items = clusterItems,
+                        onClusterItemClick = { item ->
+                            onRestaurantClick(item.restaurant)
+                            true
+                        },
+                        clusterItemContent = { item ->
+                            RestaurantMarker(
+                                category = item.restaurant.category
+                            )
+                        },
+                        clusterContent = { cluster ->
+                            Box(
+                                modifier = Modifier
+                                    .size(UiConstants.MapClusterSize)
+                                    .background(
+                                        color = MapIconBlue,
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = cluster.size.toString(),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
-                            ),
-                            title = restaurant.name,
-                            snippet = restaurant.address,
-                            icon = restaurantMarkerIcon,
-                            onClick = {
-                                onRestaurantClick(restaurant)
-                                true
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -186,104 +248,185 @@ fun MapScreen(
 }
 
 @Composable
-private fun MapTopBar() {
+private fun MapTopBar(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MapTopBarBg,
         shadowElevation = UiConstants.MapTopBarElevation
-    ){
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = UiConstants.ScreenPadding,
-                    vertical = UiConstants.MapTopBarVerticalPadding
-                ),
-            verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
-            ) {
-                Text(
-                    text = stringResource(R.string.map_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MapTitleColor
-                )
-
-                Text(
-                    text = stringResource(R.string.map_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MapSubtitleColor
-                )
-            }
-
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(UiConstants.MapTopBarIconContainerSize)
-                    .background(
-                        color = MapIconBg,
-                        shape = CircleShape
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = UiConstants.ScreenPadding,
+                        vertical = UiConstants.MapTopBarVerticalPadding
                     ),
-                contentAlignment = Alignment.Center
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Restaurant,
-                    contentDescription = null,
-                    tint = MapIconBlue,
-                    modifier = Modifier.size(UiConstants.MapTopBarIconSize)
-                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
+                ) {
+                    Text(
+                        text = stringResource(R.string.map_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MapTitleColor
+                    )
+
+                    Text(
+                        text = stringResource(R.string.map_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MapSubtitleColor
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(UiConstants.MapTopBarIconContainerSize)
+                        .background(
+                            color = MapIconBg,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Restaurant,
+                        contentDescription = null,
+                        tint = MapIconBlue,
+                        modifier = Modifier.size(UiConstants.MapTopBarIconSize)
+                    )
+                }
+            }
+
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = UiConstants.ScreenPadding,
+                        end = UiConstants.ScreenPadding,
+                        bottom = UiConstants.MapCategoryBottomPadding
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+            ) {
+                items(MapCategories) { category ->
+                    CategoryChip(
+                        category = category,
+                        selected = selectedCategory == category.id,
+                        onClick = {
+                            onCategorySelected(category.id)
+                        }
+                    )
+                }
             }
         }
     }
 }
 
-private fun bitmapDescriptorFromVectorOrNull(
-    context: Context,
-    @DrawableRes vectorResId: Int
-): BitmapDescriptor? {
-    return try {
-        MapsInitializer.initialize(context)
+@Composable
+private fun CategoryChip(
+    category: MapCategory,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (selected) {
+        category.color
+    } else {
+        Color.White
+    }
 
-        val vectorDrawable = ContextCompat.getDrawable(context, vectorResId)
-            ?: return null
+    val textColor = if (selected) {
+        Color.White
+    } else {
+        category.color
+    }
 
-        val width = if (vectorDrawable.intrinsicWidth > 0) {
-            vectorDrawable.intrinsicWidth
-        } else {
-            DEFAULT_MARKER_WIDTH
-        }
-
-        val height = if (vectorDrawable.intrinsicHeight > 0) {
-            vectorDrawable.intrinsicHeight
-        } else {
-            DEFAULT_MARKER_HEIGHT
-        }
-
-        val bitmap = Bitmap.createBitmap(
-            width,
-            height,
-            Bitmap.Config.ARGB_8888
+    Box(
+        modifier = Modifier
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(UiConstants.PillRadius)
+            )
+            .clickable(onClick = onClick)
+            .padding(
+                horizontal = UiConstants.PillHorizontalPadding,
+                vertical = UiConstants.PillVerticalPadding
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = category.title,
+            color = textColor,
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.labelMedium
         )
-
-        val canvas = Canvas(bitmap)
-
-        vectorDrawable.setBounds(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        )
-
-        vectorDrawable.draw(canvas)
-
-        BitmapDescriptorFactory.fromBitmap(bitmap)
-    } catch (exception: Exception) {
-        Log.e("MapScreen", "Marker icon could not be created", exception)
-        null
     }
 }
 
-private const val DEFAULT_MARKER_WIDTH = 80
-private const val DEFAULT_MARKER_HEIGHT = 92
+@Composable
+private fun RestaurantMarker(
+    category: String
+) {
+    Image(
+        painter = painterResource(
+            id = getMarkerDrawableByCategory(category)
+        ),
+        contentDescription = null,
+        modifier = Modifier.size(UiConstants.MapClusterItemSize)
+    )
+}
+
+private fun getMarkerDrawableByCategory(
+    category: String
+): Int {
+    return when (category) {
+        "doner" -> R.drawable.ic_marker_doner
+        "fish" -> R.drawable.ic_marker_fish
+        "burger" -> R.drawable.ic_marker_burger
+        "pide" -> R.drawable.ic_marker_pide
+        "breakfast" -> R.drawable.ic_marker_breakfast
+        "dessert" -> R.drawable.ic_marker_dessert
+        "cafe" -> R.drawable.ic_marker_cafe
+        "pizza" -> R.drawable.ic_marker_pizza
+        "sushi" -> R.drawable.ic_marker_sushi
+        "meyhane" -> R.drawable.ic_marker_meyhane
+        "kebab" -> R.drawable.ic_restaurant_marker
+        else -> R.drawable.ic_restaurant_marker
+    }
+}
+
+private data class MapCategory(
+    val id: String,
+    val title: String,
+    val color: Color
+)
+
+private data class RestaurantClusterItem(
+    val restaurant: Restaurant
+) : ClusterItem {
+
+    override fun getPosition(): LatLng {
+        return LatLng(
+            restaurant.latitude,
+            restaurant.longitude
+        )
+    }
+
+    override fun getTitle(): String {
+        return restaurant.name
+    }
+
+    override fun getSnippet(): String {
+        return restaurant.address
+    }
+
+    override fun getZIndex(): Float? {
+        return null
+    }
+}
