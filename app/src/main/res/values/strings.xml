@@ -167,4 +167,5 @@
     <string name="rating_easy">Kolay</string>
     <string name="rating_central">Merkezi</string>
     <string name="map_category_empty">Bu kategoride restoran bulunamadı.</string>
+    <string name="map_retry">Tekrar Dene</string>
 </resources>

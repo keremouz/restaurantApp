@@ -2,6 +2,7 @@ package com.example.restaurantapp.presentation.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.domain.repository.RestaurantRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +18,8 @@ class MapViewModel(
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
 
     fun updateConnectionState(isConnected: Boolean) {
-        _uiState.update {
-            it.copy(
+        _uiState.update { currentState ->
+            currentState.copy(
                 isConnected = isConnected,
                 isLoading = false,
                 errorMessage = null
@@ -30,10 +31,26 @@ class MapViewModel(
         }
     }
 
+    fun onCategorySelected(category: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedCategory = category,
+                filteredRestaurants = filterRestaurants(
+                    restaurants = currentState.restaurants,
+                    selectedCategory = category
+                )
+            )
+        }
+    }
+
+    fun retryLoadRestaurants() {
+        loadRestaurants()
+    }
+
     fun loadRestaurants() {
         if (!_uiState.value.isConnected) {
-            _uiState.update {
-                it.copy(
+            _uiState.update { currentState ->
+                currentState.copy(
                     isLoading = false,
                     errorMessage = null
                 )
@@ -42,8 +59,8 @@ class MapViewModel(
         }
 
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
+            _uiState.update { currentState ->
+                currentState.copy(
                     isLoading = true,
                     errorMessage = null
                 )
@@ -51,20 +68,39 @@ class MapViewModel(
 
             try {
                 val restaurants = repository.getNearbyRestaurants()
-                _uiState.update {
-                    it.copy(
+                val selectedCategory = _uiState.value.selectedCategory
+
+                _uiState.update { currentState ->
+                    currentState.copy(
                         isLoading = false,
                         restaurants = restaurants,
+                        filteredRestaurants = filterRestaurants(
+                            restaurants = restaurants,
+                            selectedCategory = selectedCategory
+                        ),
                         errorMessage = null
                     )
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
+            } catch (exception: Exception) {
+                _uiState.update { currentState ->
+                    currentState.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Bir hata oluştu"
+                        errorMessage = exception.message ?: "Bir hata oluştu"
                     )
                 }
+            }
+        }
+    }
+
+    private fun filterRestaurants(
+        restaurants: List<Restaurant>,
+        selectedCategory: String
+    ): List<Restaurant> {
+        return if (selectedCategory == MAP_CATEGORY_ALL) {
+            restaurants
+        } else {
+            restaurants.filter { restaurant ->
+                restaurant.category == selectedCategory
             }
         }
     }

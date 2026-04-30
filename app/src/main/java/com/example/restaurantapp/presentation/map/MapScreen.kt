@@ -1,6 +1,5 @@
 package com.example.restaurantapp.presentation.map
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,14 +47,17 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
-
-private const val CATEGORY_ALL = "all"
+import kotlinx.coroutines.launch
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
@@ -63,7 +66,7 @@ private val MapIconBg = Color(0xFFDCE6FF)
 private val MapIconBlue = Color(0xFF2F5BFF)
 
 private val MapCategories = listOf(
-    MapCategory(CATEGORY_ALL, "Tümü", Color(0xFF2F5BFF)),
+    MapCategory(MAP_CATEGORY_ALL, "Tümü", Color(0xFF2F5BFF)),
     MapCategory("restaurant", "Restoran", Color(0xFF5E6CE7)),
     MapCategory("doner", "Döner", Color(0xFFFF7043)),
     MapCategory("fish", "Balık", Color(0xFF00A6D6)),
@@ -91,34 +94,18 @@ fun MapScreen(
         )
     }
 
-    Log.d("KEY_CHECK", "Places key empty: ${BuildConfig.PLACES_API_KEY.isBlank()}")
-
     val viewModel: MapViewModel = viewModel(
         factory = MapViewModelFactory(repository)
     )
 
     val uiState by viewModel.uiState.collectAsState()
 
-    var selectedCategory by remember {
-        mutableStateOf(CATEGORY_ALL)
-    }
-
     LaunchedEffect(isConnected) {
         viewModel.updateConnectionState(isConnected)
     }
 
-    val filteredRestaurants = remember(uiState.restaurants, selectedCategory) {
-        if (selectedCategory == CATEGORY_ALL) {
-            uiState.restaurants
-        } else {
-            uiState.restaurants.filter { restaurant ->
-                restaurant.category == selectedCategory
-            }
-        }
-    }
-
-    val clusterItems = remember(filteredRestaurants) {
-        filteredRestaurants.map { restaurant ->
+    val clusterItems = remember(uiState.filteredRestaurants) {
+        uiState.filteredRestaurants.map { restaurant ->
             RestaurantClusterItem(restaurant)
         }
     }
@@ -129,13 +116,32 @@ fun MapScreen(
         position = CameraPosition.fromLatLngZoom(istanbul, 11f)
     }
 
+    val coroutineScope = rememberCoroutineScope()
+
+    val mapProperties = remember {
+        MapProperties(
+            isBuildingEnabled = true,
+            isIndoorEnabled = true,
+            isTrafficEnabled = false
+        )
+    }
+
+    val mapUiSettings = remember {
+        MapUiSettings(
+            compassEnabled = true,
+            zoomControlsEnabled = false,
+            mapToolbarEnabled = false,
+            myLocationButtonEnabled = false
+        )
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             MapTopBar(
-                selectedCategory = selectedCategory,
+                selectedCategory = uiState.selectedCategory,
                 onCategorySelected = { category ->
-                    selectedCategory = category
+                    viewModel.onCategorySelected(category)
                 }
             )
         }
@@ -163,17 +169,13 @@ fun MapScreen(
             }
 
             uiState.errorMessage != null -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "${stringResource(R.string.map_error_prefix)} ${uiState.errorMessage}",
-                        color = MapTitleColor
-                    )
-                }
+                MapErrorContent(
+                    message = "${stringResource(R.string.map_error_prefix)} ${uiState.errorMessage}",
+                    modifier = Modifier.padding(paddingValues),
+                    onRetryClick = {
+                        viewModel.retryLoadRestaurants()
+                    }
+                )
             }
 
             uiState.restaurants.isEmpty() -> {
@@ -190,7 +192,7 @@ fun MapScreen(
                 }
             }
 
-            filteredRestaurants.isEmpty() -> {
+            uiState.filteredRestaurants.isEmpty() -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -209,10 +211,30 @@ fun MapScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
-                    cameraPositionState = cameraPositionState
+                    cameraPositionState = cameraPositionState,
+                    properties = mapProperties,
+                    uiSettings = mapUiSettings
                 ) {
                     Clustering(
                         items = clusterItems,
+                        onClusterClick = { cluster ->
+                            val boundsBuilder = LatLngBounds.builder()
+
+                            cluster.items.forEach { item ->
+                                boundsBuilder.include(item.position)
+                            }
+
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    update = CameraUpdateFactory.newLatLngBounds(
+                                        boundsBuilder.build(),
+                                        MAP_CLUSTER_ZOOM_PADDING
+                                    )
+                                )
+                            }
+
+                            true
+                        },
                         onClusterItemClick = { item ->
                             onRestaurantClick(item.restaurant)
                             true
@@ -243,6 +265,41 @@ fun MapScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun MapErrorContent(
+    message: String,
+    modifier: Modifier = Modifier,
+    onRetryClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(UiConstants.ScreenPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = message,
+            color = MapTitleColor,
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        Button(
+            onClick = onRetryClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MapIconBlue
+            ),
+            shape = RoundedCornerShape(UiConstants.ButtonRadius),
+            modifier = Modifier.padding(top = UiConstants.ContentSpacing)
+        ) {
+            Text(
+                text = stringResource(R.string.map_retry),
+                color = Color.White
+            )
         }
     }
 }
@@ -430,3 +487,5 @@ private data class RestaurantClusterItem(
         return null
     }
 }
+
+private const val MAP_CLUSTER_ZOOM_PADDING = 120
