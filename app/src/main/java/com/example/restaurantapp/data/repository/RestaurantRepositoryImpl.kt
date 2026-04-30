@@ -44,7 +44,7 @@ class RestaurantRepositoryImpl(
             LatLngDto(latitude = 41.0244, longitude = 29.1244), // Ümraniye
             LatLngDto(latitude = 40.9869, longitude = 29.1244), // Ataşehir
             LatLngDto(latitude = 40.8787, longitude = 29.2347), // Pendik
-            LatLngDto(latitude = 40.8917, longitude = 29.1850),  // Kartal / Maltepe
+            LatLngDto(latitude = 40.8917, longitude = 29.1850), // Maltepe
             LatLngDto(latitude = 41.1663, longitude = 29.0500), // Sarıyer
             LatLngDto(latitude = 41.1239, longitude = 29.1083), // Beykoz
             LatLngDto(latitude = 40.8170, longitude = 29.3000), // Tuzla

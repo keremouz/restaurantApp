@@ -146,5 +146,25 @@
     <string name="level_gourmet">Gurme</string>
     <string name="level_restaurant_expert">Restoran Uzmanı</string>
     <string name="map_subtitle">Yakındaki restoranları keşfet</string>
+    <string name="write_review_title">Değerlendirme Yaz</string>
+    <string name="submit">Gönder</string>
+    <string name="rate_your_experience">Deneyiminizi\nDeğerlendirin</string>
+    <string name="comment_hint">Yemeğiniz, servis ve genel atmosfer hakkında düşüncelerinizi paylaşın...</string>
+
+    <string name="rating_select">Seçiniz</string>
+    <string name="rating_bad">Kötü</string>
+    <string name="rating_average">Orta</string>
+    <string name="rating_good">İyi</string>
+    <string name="rating_very_good">Çok İyi</string>
+    <string name="rating_excellent">Mükemmel</string>
+    <string name="rating_weak">Zayıf</string>
+    <string name="rating_okay">İdare Eder</string>
+    <string name="rating_reasonable">Makul</string>
+    <string name="rating_simple">Sade</string>
+    <string name="rating_nice">Hoş</string>
+    <string name="rating_chic">Şık</string>
+    <string name="rating_far">Uzak</string>
+    <string name="rating_easy">Kolay</string>
+    <string name="rating_central">Merkezi</string>
 
 </resources>
