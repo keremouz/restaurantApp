@@ -57,6 +57,7 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
 import kotlinx.coroutines.launch
 
+
 private val PrimaryBlue = Color(0xFF3366FF)
 private val ScreenBg = Color(0xFFF8F8FC)
 private val FieldBg = Color(0xFFF1F3FF)
@@ -76,6 +77,7 @@ fun LoginScreen(
     val authManager = remember { AuthManager() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -344,7 +346,7 @@ fun LoginScreen(
                                     isGoogleLoading = false
                                     onLoginSuccess()
                                 },
-                                onError = { message ->
+                                onError = { message: String ->
                                     isGoogleLoading = false
                                     errorMessage = message
                                 }

@@ -1,49 +1,42 @@
 package com.example.restaurantapp.presentation.navigation
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
+import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
-import android.content.Intent
-import android.net.Uri
-import android.content.ActivityNotFoundException
-import androidx.compose.ui.platform.LocalContext
-
-
+import kotlinx.coroutines.launch
 
 private val BottomBarBlue = Color(0xFF2F5BFF)
 private val BottomBarSelectedIcon = Color.White
 private val BottomBarUnselectedIcon = Color(0xFFDCE4FF)
 private val BottomBarSelectedBg = Color.White.copy(alpha = 0.16f)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainBottomBarScreen(
     isConnected: Boolean,
@@ -54,11 +47,35 @@ fun MainBottomBarScreen(
 ) {
     val bottomNavController = rememberNavController()
     val context = LocalContext.current
+    val authManager = remember { AuthManager() }
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showDeleteSheet by remember { mutableStateOf(false) }
+
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Favorites,
         BottomNavItem.Account
     )
+    LaunchedEffect(Unit) {
+        if (showDeleteSheet) {
+            authManager.deleteAccount(
+                onSuccess = {
+                    Toast.makeText(context, "Hesap silindi", Toast.LENGTH_SHORT).show()
+
+                    onNavigateToLogin()
+                },
+                onError = { error ->
+                    if (error == "REAUTH_REQUIRED") {
+                        onNavigateToLogin()
+                    } else {
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -78,9 +95,9 @@ fun MainBottomBarScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
-                modifier = Modifier
-                    .fillMaxWidth(UiConstants.BottomBarWidthFraction)
-                    .height(UiConstants.BottomBarHeight),
+                    modifier = Modifier
+                        .fillMaxWidth(UiConstants.BottomBarWidthFraction)
+                        .height(UiConstants.BottomBarHeight),
                     shape = RoundedCornerShape(UiConstants.BottomBarCornerRadius),
                     color = BottomBarBlue,
                     shadowElevation = UiConstants.BottomBarElevation
@@ -88,15 +105,13 @@ fun MainBottomBarScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(
-                                horizontal = UiConstants.BottomBarInnerHorizontalPadding
-                            ),
+                            .padding(horizontal = UiConstants.BottomBarInnerHorizontalPadding),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         items.forEach { item ->
-                            val selected = currentDestination?.hierarchy?.any { destination ->
-                                destination.route == item.route
+                            val selected = currentDestination?.hierarchy?.any {
+                                it.route == item.route
                             } == true
 
                             BottomBarItem(
@@ -118,6 +133,7 @@ fun MainBottomBarScreen(
             }
         }
     ) { innerPadding ->
+
         NavHost(
             navController = bottomNavController,
             startDestination = Routes.MAP,
@@ -143,6 +159,8 @@ fun MainBottomBarScreen(
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister,
                     onNavigateToMyReviews = onNavigateToMyReviews,
+
+
                     onRateAppClick = {
                         try {
                             val intent = Intent(
@@ -159,14 +177,89 @@ fun MainBottomBarScreen(
                             )
                         }
                     },
+
                     onLanguageClick = {
-                        // şimdilik boş bırakıyoruz (sonra yapıcaz)
+                        // sonra yapacağız
                     },
 
+
                     onDeleteAccountClick = {
-                        // bunu da sonraki adımda yapıcaz
+                        showDeleteSheet = true
                     }
                 )
+            }
+        }
+    }
+
+
+    if (showDeleteSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showDeleteSheet = false },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(UiConstants.ScreenPadding),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.ContentSpacing)
+            ) {
+
+                Text(
+                    text = stringResource(R.string.delete_account),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = stringResource(R.string.delete_account_subtitle),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                val message = stringResource(R.string.account_deleted)
+
+                Button(
+                    onClick = {
+                        scope.launch { sheetState.hide() }
+                        showDeleteSheet = false
+
+                        authManager.deleteAccount(
+                            onSuccess = {
+                                Toast.makeText(
+                                    context,
+                                    message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                onNavigateToLogin()
+                            },
+                            onError = { error ->
+                                if (error == "REAUTH_REQUIRED") {
+                                    onNavigateToLogin() // 🔥 login'e gönder
+                                } else {
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF64B5F6)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(stringResource(R.string.delete_account))
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        scope.launch { sheetState.hide() }
+                        showDeleteSheet = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
             }
         }
     }

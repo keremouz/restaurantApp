@@ -174,7 +174,7 @@ fun AccountScreen(
                     onRateAppClick = onRateAppClick,
                     onLanguageClick = onLanguageClick,
                     onDeleteAccountClick = onDeleteAccountClick,
-                    onLogoutClick = { authManager.logout() }
+                    onLogoutClick = { authManager.signOut() }
                 )
             }
         }

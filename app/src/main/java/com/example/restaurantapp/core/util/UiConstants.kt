@@ -110,4 +110,7 @@ object UiConstants {
     // Review detail screen
     val ReviewStarSize = 22.dp
     val ReviewCommentFieldHeight = 150.dp
+    // BottomSheet
+    val BottomSheetPadding = 24.dp
+    val BottomSheetSpacing = 16.dp
 }

@@ -1,11 +1,11 @@
 package com.example.restaurantapp.presentation.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.MyReviewsScreen
 import com.example.restaurantapp.presentation.auth.LoginScreen
@@ -18,32 +18,81 @@ fun AppNavGraph(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
+    val authManager = AuthManager()
+
+    val startDestination = if (authManager.isUserLoggedIn()) {
+        Routes.MAIN
+    } else {
+        Routes.LOGIN
+    }
 
     NavHost(
         navController = navController,
-        startDestination = Routes.MAIN,
+        startDestination = startDestination,
         modifier = modifier
     ) {
+
         composable(Routes.MAIN) {
             MainBottomBarScreen(
                 isConnected = isConnected,
+
                 onNavigateToLogin = {
-                    navController.navigate(Routes.LOGIN)
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
                 },
+
                 onNavigateToRegister = {
                     navController.navigate(Routes.REGISTER)
                 },
-                onRestaurantClick = { restaurant ->
-                    if (isConnected) {
-                        navController.currentBackStackEntry
-                            ?.savedStateHandle
-                            ?.set("selected_restaurant", restaurant)
 
-                        navController.navigate(Routes.RESTAURANT_DETAIL)
-                    }
+                onRestaurantClick = { restaurant ->
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_restaurant", restaurant)
+
+                    navController.navigate(Routes.RESTAURANT_DETAIL)
                 },
+
                 onNavigateToMyReviews = {
                     navController.navigate(Routes.MY_REVIEWS)
+                }
+            )
+        }
+
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                onBackClick = {},
+
+                onNavigateToRegister = {
+                    navController.navigate(Routes.REGISTER)
+                },
+
+                onLoginSuccess = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(Routes.REGISTER) {
+            RegisterScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+
+                onNavigateToLogin = {
+                    navController.navigate(Routes.LOGIN)
+                },
+
+                onRegisterSuccess = {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(0)
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -63,35 +112,10 @@ fun AppNavGraph(
                 )
             }
         }
+
         composable(Routes.MY_REVIEWS) {
             MyReviewsScreen(
                 onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(Routes.LOGIN) {
-            LoginScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToRegister = {
-                    navController.navigate(Routes.REGISTER)
-                },
-                onLoginSuccess = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(Routes.REGISTER) {
-            RegisterScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToLogin = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) { inclusive = true }
-                    }
-                },
-                onRegisterSuccess = {
-                    navController.popBackStack()
-                }
             )
         }
     }

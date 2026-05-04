@@ -28,4 +28,5 @@ sealed class BottomNavItem(
         title = "Hesap",
         icon = Icons.Default.Person
     )
+
 }

@@ -1,12 +1,22 @@
 package com.example.restaurantapp.data.firebase
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 class AuthManager(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
+
+    fun isUserLoggedIn(): Boolean {
+        return auth.currentUser != null
+    }
 
     fun login(
         email: String,
@@ -15,11 +25,9 @@ class AuthManager(
         onError: (String) -> Unit
     ) {
         auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
-                onSuccess()
-            }
-            .addOnFailureListener { exception ->
-                onError(exception.message ?: "Giriş başarısız")
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener {
+                onError(it.message ?: "Giriş başarısız")
             }
     }
 
@@ -33,12 +41,7 @@ class AuthManager(
     ) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { result ->
-                val uid = result.user?.uid
-
-                if (uid.isNullOrBlank()) {
-                    onError("Kullanıcı kimliği alınamadı")
-                    return@addOnSuccessListener
-                }
+                val uid = result.user?.uid ?: return@addOnSuccessListener
 
                 val userProfile = UserProfile(
                     uid = uid,
@@ -50,66 +53,76 @@ class AuthManager(
                 firestore.collection("users")
                     .document(uid)
                     .set(userProfile)
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
-                    .addOnFailureListener { exception ->
-                        onError(exception.message ?: "Kullanıcı profili kaydedilemedi")
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener {
+                        onError(it.message ?: "Profil kaydedilemedi")
                     }
             }
-            .addOnFailureListener { exception ->
-                onError(exception.message ?: "Kayıt başarısız")
+            .addOnFailureListener {
+                onError(it.message ?: "Kayıt başarısız")
             }
     }
 
-    fun isUserLoggedIn(): Boolean {
-        return auth.currentUser != null
-    }
-
-    fun logout() {
+    fun signOut() {
         auth.signOut()
     }
 
+    fun deleteAccount(
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val user = auth.currentUser ?: return onError("Kullanıcı yok")
+        val uid = user.uid
+
+        user.delete()
+            .addOnSuccessListener {
+                firestore.collection("users").document(uid).delete()
+                auth.signOut()
+                onSuccess()
+            }
+            .addOnFailureListener {
+                if (it.message?.contains("requires recent authentication") == true) {
+                    onError("REAUTH_REQUIRED")
+                } else {
+                    onError(it.message ?: "Silinemedi")
+                }
+            }
+    }
+
     suspend fun signInWithGoogle(
-        context: android.content.Context,
-        credentialRequest: androidx.credentials.GetCredentialRequest,
+        context: Context,
+        credentialRequest: GetCredentialRequest,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
         try {
-            val credentialManager = androidx.credentials.CredentialManager.create(context)
-            val result = credentialManager.getCredential(
-                context = context,
-                request = credentialRequest
-            )
+            val credentialManager = CredentialManager.create(context)
+            val result = credentialManager.getCredential(context, credentialRequest)
 
             val credential = result.credential
 
             if (
-                credential is androidx.credentials.CustomCredential &&
-                credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+                credential is CustomCredential &&
+                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
                 val googleIdTokenCredential =
-                    com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-                        .createFrom(credential.data)
+                    GoogleIdTokenCredential.createFrom(credential.data)
 
-                val firebaseCredential = com.google.firebase.auth.GoogleAuthProvider.getCredential(
+                val firebaseCredential = GoogleAuthProvider.getCredential(
                     googleIdTokenCredential.idToken,
                     null
                 )
 
                 auth.signInWithCredential(firebaseCredential)
-                    .addOnSuccessListener {
-                        onSuccess()
-                    }
-                    .addOnFailureListener { exception ->
-                        onError(exception.message ?: "Google ile giriş başarısız")
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener {
+                        onError(it.message ?: "Google giriş başarısız")
                     }
             } else {
                 onError("Google credential alınamadı")
             }
         } catch (e: Exception) {
-            onError(e.message ?: "Google ile giriş başarısız")
+            onError(e.message ?: "Google giriş başarısız")
         }
     }
 }
