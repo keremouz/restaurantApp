@@ -32,6 +32,12 @@ import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.AccountScreen
 import com.example.restaurantapp.presentation.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
+import android.content.Intent
+import android.net.Uri
+import android.content.ActivityNotFoundException
+import androidx.compose.ui.platform.LocalContext
+
+
 
 private val BottomBarBlue = Color(0xFF2F5BFF)
 private val BottomBarSelectedIcon = Color.White
@@ -47,7 +53,7 @@ fun MainBottomBarScreen(
     onNavigateToMyReviews: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
-
+    val context = LocalContext.current
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Favorites,
@@ -137,9 +143,29 @@ fun MainBottomBarScreen(
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister,
                     onNavigateToMyReviews = onNavigateToMyReviews,
-                    onRateAppClick = {},
-                    onLanguageClick = {},
-                    onDeleteAccountClick = {}
+                    onRateAppClick = {
+                        try {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("market://details?id=${context.packageName}")
+                            )
+                            context.startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
+                                )
+                            )
+                        }
+                    },
+                    onLanguageClick = {
+                        // şimdilik boş bırakıyoruz (sonra yapıcaz)
+                    },
+
+                    onDeleteAccountClick = {
+                        // bunu da sonraki adımda yapıcaz
+                    }
                 )
             }
         }

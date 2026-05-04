@@ -67,7 +67,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 
 private val AccountBlue = Color(0xFF2F5BFF)
-private val AccountBg = Color(0xFFF7F7FB)
+private val AccountBg = Color.White
 private val AccountCardBg = Color.White
 private val AvatarBg = Color(0xFFE8EEFF)
 private val MenuIconBg = Color(0xFFE8EEFF)

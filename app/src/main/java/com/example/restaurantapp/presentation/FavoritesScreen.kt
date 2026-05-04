@@ -62,10 +62,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
 import androidx.compose.material3.HorizontalDivider
 
-private val FavoritesBg = Color(0xFFF7F7FB)
+private val FavoritesBg = Color.White
 private val FavoriteItemBg = Color(0xFFEFF4FF)
 private val FavoriteCardBorder = Color(0xFFD6E2FF)
-
 private val FavoriteBlue = Color(0xFF244ED8)
 private val TitleBlue = Color(0xFF0B2F86)
 private val SoftBlue = Color(0xFF66789E)
