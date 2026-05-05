@@ -35,9 +35,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,6 +60,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
@@ -65,6 +68,7 @@ import com.example.restaurantapp.presentation.components.ConnectionWarningConten
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.draw.clip
 
 private val AccountBlue = Color(0xFF2F5BFF)
 private val AccountBg = Color.White
@@ -80,6 +84,7 @@ private val TextSecondary = Color(0xFF7B7B84)
 private val DividerColor = Color(0xFFE9E9EF)
 private val GuestTextGray = Color(0xFF4F4F4F)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     isConnected: Boolean,
@@ -98,6 +103,17 @@ fun AccountScreen(
     var fullName by remember { mutableStateOf("") }
     var reviewCount by remember { mutableIntStateOf(0) }
     var favoriteCount by remember { mutableIntStateOf(0) }
+
+    var showAvatarSheet by remember { mutableStateOf(false) }
+    var selectedAvatar by remember { mutableIntStateOf(R.drawable.avatar_person) }
+
+    val avatars = listOf(
+        R.drawable.avatar_person,
+        R.drawable.avatar_woman,
+        R.drawable.avatar_chef,
+        R.drawable.avatar_burger,
+        R.drawable.avatar_crown
+    )
 
     DisposableEffect(Unit) {
         val listener = FirebaseAuth.AuthStateListener { auth ->
@@ -170,12 +186,68 @@ fun AccountScreen(
                     email = currentUser?.email ?: "-",
                     reviewCount = reviewCount,
                     favoriteCount = favoriteCount,
+                    selectedAvatar = selectedAvatar,
+                    onAvatarClick = {
+                        showAvatarSheet = true
+                    },
                     onNavigateToMyReviews = onNavigateToMyReviews,
                     onRateAppClick = onRateAppClick,
                     onLanguageClick = onLanguageClick,
                     onDeleteAccountClick = onDeleteAccountClick,
                     onLogoutClick = { authManager.signOut() }
                 )
+            }
+        }
+    }
+
+    if (showAvatarSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showAvatarSheet = false }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Profil Fotoğrafı Seç",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    avatars.forEach { avatar ->
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(AvatarBg, CircleShape)
+                                .clickable {
+                                    selectedAvatar = avatar
+                                    showAvatarSheet = false
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = avatar),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        selectedAvatar = avatar
+                                        showAvatarSheet = false
+                                    }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -188,6 +260,8 @@ private fun LoggedInAccountContent(
     email: String,
     reviewCount: Int,
     favoriteCount: Int,
+    selectedAvatar: Int,
+    onAvatarClick: () -> Unit,
     onNavigateToMyReviews: () -> Unit,
     onRateAppClick: () -> Unit,
     onLanguageClick: () -> Unit,
@@ -221,7 +295,9 @@ private fun LoggedInAccountContent(
 
         ProfileHeader(
             fullName = fullName,
-            email = email
+            email = email,
+            selectedAvatar = selectedAvatar,
+            onAvatarClick = onAvatarClick
         )
 
         Spacer(modifier = Modifier.height(UiConstants.AccountSectionSpacing))
@@ -397,7 +473,9 @@ private fun GuestAccountContent(
 @Composable
 private fun ProfileHeader(
     fullName: String,
-    email: String
+    email: String,
+    selectedAvatar: Int,
+    onAvatarClick: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -407,14 +485,19 @@ private fun ProfileHeader(
             Box(
                 modifier = Modifier
                     .size(UiConstants.AccountAvatarSize)
-                    .background(AvatarBg, CircleShape),
+                    .background(AvatarBg, CircleShape)
+                    .clickable { onAvatarClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
+                Image(
+                    painter = painterResource(id = selectedAvatar),
                     contentDescription = null,
-                    tint = AccountBlue,
-                    modifier = Modifier.size(UiConstants.AccountAvatarIconSize)
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            onAvatarClick()
+                        }
                 )
             }
 
@@ -426,7 +509,8 @@ private fun ProfileHeader(
                         width = UiConstants.AccountOutlinedButtonBorderWidth,
                         color = Color.White,
                         shape = CircleShape
-                    ),
+                    )
+                    .clickable { onAvatarClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
