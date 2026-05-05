@@ -24,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,7 +61,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
-import androidx.compose.material3.HorizontalDivider
 
 private val FavoritesBg = Color.White
 private val FavoriteItemBg = Color(0xFFEFF4FF)
@@ -71,7 +71,7 @@ private val SoftBlue = Color(0xFF66789E)
 
 private data class FavoriteRatingInfo(
     val myRating: Double? = null,
-    val othersAverageRating: Double? = null
+    val generalRating: Double? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -308,6 +308,7 @@ private fun FavoritesContent(
         }
     }
 }
+
 @Composable
 private fun FavoriteItemCard(
     favorite: FavoriteRestaurant,
@@ -377,13 +378,14 @@ private fun FavoriteItemCard(
 
                 RatingInfoBlock(
                     title = "Genel Puan",
-                    value = formatRating(ratingInfo.othersAverageRating),
+                    value = formatRating(ratingInfo.generalRating),
                     modifier = Modifier.weight(1f)
                 )
             }
         }
     }
 }
+
 @Composable
 private fun RatingInfoBlock(
     title: String,
@@ -533,23 +535,19 @@ private fun loadFavoriteRatings(
                     null
                 }
 
-                val othersRatings = matchedComments
-                    .filter { document ->
-                        document.getString("userId") != currentUserId
-                    }
-                    .mapNotNull { document ->
-                        extractRatingFromComment(document)
-                    }
+                val allRatings = matchedComments.mapNotNull { document ->
+                    extractRatingFromComment(document)
+                }
 
-                val othersAverageRating = if (othersRatings.isNotEmpty()) {
-                    othersRatings.average()
+                val generalRating = if (allRatings.isNotEmpty()) {
+                    allRatings.average()
                 } else {
                     null
                 }
 
                 val ratingInfo = FavoriteRatingInfo(
                     myRating = myRating,
-                    othersAverageRating = othersAverageRating
+                    generalRating = generalRating
                 )
 
                 result[favorite.placeId] = ratingInfo
@@ -589,7 +587,7 @@ private fun extractRatingFromComment(
 
 private fun formatRating(value: Double?): String {
     return value?.let {
-        String.format(Locale.US, "%.1f", it)
+        String.format(Locale.getDefault(), "%.1f", it)
     } ?: "-"
 }
 

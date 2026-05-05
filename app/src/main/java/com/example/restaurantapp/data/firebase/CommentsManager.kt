@@ -91,4 +91,36 @@ class CommentsManager(
                 onError(e.message ?: "Yorum silinemedi")
             }
     }
+    fun getRestaurantAverageRating(
+        restaurantId: String,
+        restaurantName: String,
+        onSuccess: (Double?) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        firestore.collection("comments")
+            .get()
+            .addOnSuccessListener { documents ->
+                val ratings = documents.documents.mapNotNull { document ->
+                    val commentRestaurantId = document.getString("restaurantId").orEmpty()
+                    val commentRestaurantName = document.getString("restaurantName").orEmpty()
+
+                    val isSameRestaurant =
+                        commentRestaurantId == restaurantId ||
+                                commentRestaurantName.equals(restaurantName, ignoreCase = true)
+
+                    if (isSameRestaurant) {
+                        document.getDouble("generalRating")
+                    } else {
+                        null
+                    }
+                }
+
+                onSuccess(
+                    if (ratings.isNotEmpty()) ratings.average() else null
+                )
+            }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Genel puan alınamadı")
+            }
+    }
 }

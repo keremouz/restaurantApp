@@ -40,6 +40,52 @@ class FavoritesManager(
             }
     }
 
+    fun removeFavorite(
+        restaurantId: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onError("Giriş yapmanız gerekiyor")
+            return
+        }
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("favorites")
+            .document(restaurantId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Favoriden çıkarılamadı")
+            }
+    }
+
+    fun isFavorite(
+        restaurantId: String,
+        onSuccess: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            onError("Giriş yapmanız gerekiyor")
+            return
+        }
+
+        firestore.collection("users")
+            .document(uid)
+            .collection("favorites")
+            .document(restaurantId)
+            .get()
+            .addOnSuccessListener { document ->
+                onSuccess(document.exists())
+            }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Favori durumu alınamadı")
+            }
+    }
+
     fun getFavorites(
         onSuccess: (List<FavoriteRestaurant>) -> Unit,
         onError: (String) -> Unit

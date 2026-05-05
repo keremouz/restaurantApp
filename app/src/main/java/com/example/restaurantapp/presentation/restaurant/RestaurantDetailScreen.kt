@@ -17,8 +17,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,12 +47,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.CommentRatings
 import com.example.restaurantapp.data.firebase.CommentsManager
+import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Locale
 
 private val DetailBlue = Color(0xFF2F5BFF)
 private val DetailBlueDark = Color(0xFF1E4AE9)
@@ -69,11 +76,14 @@ fun RestaurantDetailScreen(
 ) {
     val firebaseAuth = remember { FirebaseAuth.getInstance() }
     val commentsManager = remember { CommentsManager() }
+    val favoritesManager = remember { FavoritesManager() }
 
     val currentUser = firebaseAuth.currentUser
 
     var message by remember { mutableStateOf<String?>(null) }
     var commentText by remember { mutableStateOf("") }
+    var isFavorite by remember { mutableStateOf(false) }
+    var averageRating by remember { mutableStateOf<Double?>(null) }
 
     var tasteRating by remember { mutableIntStateOf(0) }
     var serviceRating by remember { mutableIntStateOf(0) }
@@ -83,6 +93,66 @@ fun RestaurantDetailScreen(
 
     val fillReviewFieldsText = stringResource(R.string.fill_review_fields)
     val commentAddedText = stringResource(R.string.comment_added)
+    val favoriteAddedText = stringResource(R.string.favorite_added)
+    val favoriteRemovedText = "Favorilerden çıkarıldı"
+
+    LaunchedEffect(restaurant.placeId, currentUser?.uid) {
+        commentsManager.getRestaurantAverageRating(
+            restaurantId = restaurant.placeId,
+            restaurantName = restaurant.name,
+            onSuccess = { rating ->
+                averageRating = rating
+            },
+            onError = {
+                averageRating = null
+            }
+        )
+
+        if (currentUser != null) {
+            favoritesManager.isFavorite(
+                restaurantId = restaurant.placeId,
+                onSuccess = { favorite ->
+                    isFavorite = favorite
+                },
+                onError = {
+                    isFavorite = false
+                }
+            )
+        } else {
+            isFavorite = false
+        }
+    }
+
+    fun toggleFavorite() {
+        if (currentUser == null) {
+            onRequireLogin()
+            return
+        }
+
+        if (isFavorite) {
+            favoritesManager.removeFavorite(
+                restaurantId = restaurant.placeId,
+                onSuccess = {
+                    isFavorite = false
+                    message = favoriteRemovedText
+                },
+                onError = { error ->
+                    message = error
+                }
+            )
+        } else {
+            favoritesManager.addFavorite(
+                restaurant = restaurant,
+                onSuccess = {
+                    isFavorite = true
+                    message = favoriteAddedText
+                },
+                onError = { error ->
+                    message = error
+                }
+            )
+        }
+    }
 
     fun submitReview() {
         if (currentUser == null) {
@@ -124,6 +194,17 @@ fun RestaurantDetailScreen(
                 pricePerformanceRating = 0
                 atmosphereRating = 0
                 locationRating = 0
+
+                commentsManager.getRestaurantAverageRating(
+                    restaurantId = restaurant.placeId,
+                    restaurantName = restaurant.name,
+                    onSuccess = { rating ->
+                        averageRating = rating
+                    },
+                    onError = {
+                        averageRating = null
+                    }
+                )
             },
             onError = { error ->
                 message = error
@@ -153,6 +234,18 @@ fun RestaurantDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { toggleFavorite() }) {
+                        Icon(
+                            imageVector = if (isFavorite) {
+                                Icons.Filled.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = stringResource(R.string.add_to_favorites),
+                            tint = DetailBlue
+                        )
+                    }
+
                     TextButton(onClick = { submitReview() }) {
                         Text(
                             text = stringResource(R.string.submit),
@@ -179,12 +272,34 @@ fun RestaurantDetailScreen(
         ) {
             Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
-            Text(
-                text = restaurant.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = DetailTextPrimary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = restaurant.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = DetailTextPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.size(UiConstants.SmallSpacing))
+
+                Text(
+                    text = averageRating?.let { rating ->
+                        "${String.format(Locale.getDefault(), "%.1f", rating)} puan"
+                    } ?: "-",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = DetailBlue,
+                    maxLines = 1,
+                    softWrap = false,
+                    textAlign = TextAlign.End
+                )
+            }
 
             Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
 
