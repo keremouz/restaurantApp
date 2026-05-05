@@ -1,0 +1,174 @@
+<resources>
+    <string name="app_name">Restaurant App</string>
+
+    <string name="map_title">Istanbul Restaurant Map</string>
+    <string name="login">Sign In</string>
+    <string name="register">Sign Up</string>
+    <string name="back">Back</string>
+
+    <string name="restaurant_detail_title">Restaurant Detail</string>
+    <string name="restaurant_detail_placeholder">Restaurant details will appear here.</string>
+    <string name="favorite_add">Add to Favorites</string>
+    <string name="write_review">Write Review</string>
+
+    <string name="login_screen_title">Sign In</string>
+    <string name="register_screen_title">Sign Up</string>
+    <string name="login_placeholder">Login screen</string>
+    <string name="register_placeholder">Register screen</string>
+    <string name="login_content_description">Sign In</string>
+    <string name="map_loading">Loading...</string>
+    <string name="map_empty">No restaurants found</string>
+    <string name="map_error_prefix">Error:</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="full_name">Full Name</string>
+    <string name="birth_date">Birth Date</string>
+    <string name="birth_date_hint">DD/MM/YYYY</string>
+    <string name="go_to_register">Don’t have an account? Sign Up</string>
+    <string name="go_to_login">Already have an account? Sign In</string>
+    <string name="loading">Loading...</string>
+
+    <string name="empty_login_error">Email and password cannot be empty</string>
+    <string name="empty_register_error">Please fill in all fields</string>
+
+    <string name="account_title">Account</string>
+    <string name="account_guest_title">Sign in to your account</string>
+    <string name="account_guest_desc">Sign in to save your favorite restaurants and manage your reviews.</string>
+    <string name="account_profile_title">Profile</string>
+    <string name="account_logged_in">Logged in</string>
+    <string name="account_email">Email: %1$s</string>
+    <string name="account_guest_message">You need to sign in to view your reviews, ratings and profile information.</string>
+    <string name="account_profile_default_name">User</string>
+    <string name="account_reviews_title">My Reviews and Ratings</string>
+    <string name="account_no_reviews">No reviews or ratings yet</string>
+    <string name="account_full_name_value">Full Name: %1$s</string>
+    <string name="account_email_value">Email: %1$s</string>
+
+    <string name="login_heading">Login</string>
+    <string name="register_heading">Register</string>
+    <string name="logout">Log Out</string>
+
+    <string name="coming_soon_title">Coming soon</string>
+    <string name="my_restaurants">My Restaurants</string>
+    <string name="my_comments">My Comments</string>
+    <string name="profile_info">Profile Info</string>
+
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="review_criteria_title">Review Criteria</string>
+    <string name="criterion_taste">Taste</string>
+    <string name="criterion_service">Service</string>
+    <string name="criterion_price_performance">Price/Performance</string>
+    <string name="criterion_atmosphere">Atmosphere</string>
+    <string name="criterion_location">Location</string>
+
+    <string name="rating_placeholder">1-5</string>
+    <string name="comment_label">Your Comment</string>
+    <string name="submit_comment">Submit Review</string>
+    <string name="go_back">Go Back</string>
+
+    <string name="favorite_added">Added to favorites</string>
+    <string name="comment_added">Comment added</string>
+    <string name="fill_review_fields">Fill all criteria between 1 and 5 and write your comment</string>
+
+    <string name="review_filter_all">All</string>
+    <string name="review_general_rating">Overall Rating</string>
+    <string name="review_selected_score">Selected Criteria</string>
+
+    <string name="no_internet_banner">No internet connection</string>
+    <string name="no_internet_page_message">Internet connection is required to view this page.</string>
+    <string name="no_internet_detail_warning">Cannot open restaurant detail without internet connection.</string>
+
+    <string name="favorites_title">My Restaurants</string>
+    <string name="favorites_empty">You haven’t added any favorite restaurants yet.</string>
+    <string name="favorites_rating_value">Rating: %1$s</string>
+
+    <string name="my_information">My Information</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="no_reviews_yet">No reviews yet</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="language_selection">Language Selection</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="account_birth_date_value">Birth Date: %1$s</string>
+    <string name="profile_title">Profile</string>
+    <string name="review_count">Number of Reviews</string>
+    <string name="my_reviews_empty">You have not made any reviews yet.</string>
+    <string name="review_date_label">Date</string>
+    <string name="login_welcome">Welcome</string>
+    <string name="login_description">Sign in to start exploring restaurants.</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="login_with_google_divider">or sign in with Google</string>
+    <string name="no_account_question">Don’t have an account?</string>
+    <string name="register_short">Sign Up</string>
+    <string name="login_fill_fields">Please fill in email and password fields.</string>
+    <string name="google_sign_in">Sign in with Google</string>
+    <string name="email_hint">example@gmail.com</string>
+    <string name="password_hint">••••••••••••</string>
+    <string name="register_screen_title_new">New Account</string>
+    <string name="register_heading_new">New Account</string>
+    <string name="register_description">Create an account to explore restaurants in Istanbul and leave reviews.</string>
+    <string name="register_terms_text">By continuing, you accept the terms of use and privacy policy.</string>
+    <string name="register_with_google_divider">or sign up with Google</string>
+    <string name="have_account_question">Already have an account?</string>
+    <string name="full_name_hint">Full Name</string>
+
+    <string name="invalid_birth_date">Enter birth date in correct format.</string>
+
+    <string name="favorites_login_required_title">Login Required</string>
+    <string name="favorites_login_required_description">You must log in to see your favorite restaurants.</string>
+    <string name="empty_favorites_title">No favorites yet</string>
+    <string name="empty_favorites_description">Restaurants you add to favorites will appear here.</string>
+    <string name="empty_favorites_image_desc">Empty favorites image</string>
+    <string name="my_favorites">My Favorites</string>
+    <string name="favorite_restaurant_count">Favorite Restaurant Count</string>
+    <string name="activity_and_preferences">Activity and Preferences</string>
+    <string name="account_section">Account</string>
+    <string name="unknown_user">User</string>
+    <string name="default_city">Istanbul, Turkey</string>
+
+    <string name="review_count_text">%1$d reviews</string>
+    <string name="rate_us_subtitle">Share your feedback with us</string>
+    <string name="current_language_tr">English (EN)</string>
+    <string name="delete_account_subtitle">Permanently delete your account</string>
+    <string name="review_count_short">Review</string>
+    <string name="favorite_count_short">Favorite</string>
+    <string name="average_rating_short">Average</string>
+    <string name="logout_subtitle">Sign out</string>
+    <string name="account_level_title">Membership Level</string>
+    <string name="account_level_description">You earned level with %1$d reviews</string>
+
+    <string name="review_count_profile">Review</string>
+    <string name="favorite_count_profile">Favorite</string>
+
+    <string name="level_new_member">New Member</string>
+    <string name="level_explorer">Explorer</string>
+    <string name="level_taste_hunter">Taste Hunter</string>
+    <string name="level_gourmet">Gourmet</string>
+    <string name="level_restaurant_expert">Restaurant Expert</string>
+    <string name="map_subtitle">Discover nearby restaurants</string>
+    <string name="write_review_title">Write Review</string>
+    <string name="submit">Submit</string>
+    <string name="rate_your_experience">Rate your\nexperience</string>
+    <string name="comment_hint">Share your thoughts about food, service and atmosphere...</string>
+
+    <string name="rating_select">Select</string>
+    <string name="rating_bad">Bad</string>
+    <string name="rating_average">Average</string>
+    <string name="rating_good">Good</string>
+    <string name="rating_very_good">Very Good</string>
+    <string name="rating_excellent">Excellent</string>
+    <string name="rating_weak">Poor</string>
+    <string name="rating_okay">Okay</string>
+    <string name="rating_reasonable">Reasonable</string>
+    <string name="rating_simple">Simple</string>
+    <string name="rating_nice">Nice</string>
+    <string name="rating_chic">Chic</string>
+    <string name="rating_far">Far</string>
+    <string name="rating_easy">Easy</string>
+    <string name="rating_central">Central</string>
+    <string name="map_category_empty">No restaurants found in this category.</string>
+    <string name="map_retry">Retry</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="account_deleted">Your account has been deleted</string>
+</resources>

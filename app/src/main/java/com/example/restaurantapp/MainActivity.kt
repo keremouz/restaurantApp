@@ -9,6 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.restaurantapp.core.network.NetworkChangeReceiver
+import com.example.restaurantapp.core.util.LocaleHelper
 import com.example.restaurantapp.presentation.navigation.AppNavGraph
 import com.example.restaurantapp.ui.theme.RestaurantAppTheme
 
@@ -18,6 +19,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        LocaleHelper.applySavedLanguage(this)
+
         super.onCreate(savedInstanceState)
 
         isConnected = NetworkChangeReceiver.isInternetAvailable(this)

@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.ChevronRight
@@ -53,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -68,7 +68,9 @@ import com.example.restaurantapp.presentation.components.ConnectionWarningConten
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.compose.ui.draw.clip
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+import com.example.restaurantapp.core.util.LocaleHelper
 
 private val AccountBlue = Color(0xFF2F5BFF)
 private val AccountBg = Color.White
@@ -105,7 +107,20 @@ fun AccountScreen(
     var favoriteCount by remember { mutableIntStateOf(0) }
 
     var showAvatarSheet by remember { mutableStateOf(false) }
+    var showLanguageSheet by remember { mutableStateOf(false) }
+
     var selectedAvatar by remember { mutableIntStateOf(R.drawable.avatar_person) }
+    val context = LocalContext.current
+
+    var selectedLanguage by remember {
+        mutableStateOf(
+            if (LocaleHelper.getLanguage(context) == "en") {
+                "English (EN)"
+            } else {
+                "Türkçe (TR)"
+            }
+        )
+    }
 
     val avatars = listOf(
         R.drawable.avatar_person,
@@ -187,12 +202,16 @@ fun AccountScreen(
                     reviewCount = reviewCount,
                     favoriteCount = favoriteCount,
                     selectedAvatar = selectedAvatar,
+                    selectedLanguage = selectedLanguage,
                     onAvatarClick = {
                         showAvatarSheet = true
                     },
                     onNavigateToMyReviews = onNavigateToMyReviews,
                     onRateAppClick = onRateAppClick,
-                    onLanguageClick = onLanguageClick,
+                    onLanguageClick = {
+                        onLanguageClick()
+                        showLanguageSheet = true
+                    },
                     onDeleteAccountClick = onDeleteAccountClick,
                     onLogoutClick = { authManager.signOut() }
                 )
@@ -222,30 +241,66 @@ fun AccountScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     avatars.forEach { avatar ->
-                        Box(
+                        Image(
+                            painter = painterResource(id = avatar),
+                            contentDescription = null,
                             modifier = Modifier
                                 .size(64.dp)
-                                .background(AvatarBg, CircleShape)
+                                .clip(CircleShape)
                                 .clickable {
                                     selectedAvatar = avatar
                                     showAvatarSheet = false
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = painterResource(id = avatar),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        selectedAvatar = avatar
-                                        showAvatarSheet = false
-                                    }
-                            )
-                        }
+                                }
+                        )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+
+    if (showLanguageSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showLanguageSheet = false }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 20.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.language_selection),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LanguageOptionItem(
+                    title = "Türkçe (TR)",
+                    isSelected = selectedLanguage == "Türkçe (TR)",
+                    onClick = {
+                        selectedLanguage = "Türkçe (TR)"
+                        LocaleHelper.setLanguage(context, "tr")
+                        showLanguageSheet = false
+                        (context as? Activity)?.recreate()
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                LanguageOptionItem(
+                    title = "English (EN)",
+                    isSelected = selectedLanguage == "English (EN)",
+                    onClick = {
+                        selectedLanguage = "English (EN)"
+                        LocaleHelper.setLanguage(context, "en")
+                        showLanguageSheet = false
+                        (context as? Activity)?.recreate()
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -261,6 +316,7 @@ private fun LoggedInAccountContent(
     reviewCount: Int,
     favoriteCount: Int,
     selectedAvatar: Int,
+    selectedLanguage: String,
     onAvatarClick: () -> Unit,
     onNavigateToMyReviews: () -> Unit,
     onRateAppClick: () -> Unit,
@@ -360,7 +416,7 @@ private fun LoggedInAccountContent(
                 AccountMenuItem(
                     icon = Icons.Default.Language,
                     title = stringResource(R.string.language_selection),
-                    subtitle = stringResource(R.string.current_language_tr),
+                    subtitle = selectedLanguage,
                     onClick = onLanguageClick
                 )
 
@@ -724,6 +780,41 @@ private fun AccountMenuItem(
             },
             modifier = Modifier.size(UiConstants.AccountChevronIconSize)
         )
+    }
+}
+@Composable
+private fun LanguageOptionItem(
+    title: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = if (isSelected) AvatarBg else Color.Transparent,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = TextPrimary,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (isSelected) {
+            Text(
+                text = "✓",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AccountBlue
+            )
+        }
     }
 }
 
