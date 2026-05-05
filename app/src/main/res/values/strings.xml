@@ -183,4 +183,14 @@
     <string name="next_level_gourmet">%1$d değerlendirme sonra Gurme olacaksınız.</string>
     <string name="next_level_restaurant_expert">%1$d değerlendirme sonra Restoran Uzmanı olacaksınız.</string>
     <string name="highest_level_reached">En yüksek seviyeye ulaştınız.</string>
+    <string name="delete_review_title">Yorumu Sil</string>
+    <string name="delete_review_message">Bu değerlendirmeyi kalıcı olarak silmek istiyor musunuz?</string>
+    <string name="delete">Sil</string>
+    <string name="review_login_required">Giriş yapmanız gerekiyor</string>
+    <string name="reviews_header_title">Deneyimleriniz.</string>
+    <string name="reviews_header_subtitle">Toplam %1$d inceleme paylaştınız.</string>
+    <string name="sort_prefix">Sırala: %1$s</string>
+    <string name="hide_details">Detayları Gizle</string>
+    <string name="details">Detaylar</string>
+    <string name="rating_point">%.1f puan</string>
 </resources>

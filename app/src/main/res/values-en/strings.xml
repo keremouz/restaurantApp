@@ -183,4 +183,14 @@
     <string name="next_level_gourmet">%1$d reviews left to become Gourmet.</string>
     <string name="next_level_restaurant_expert">%1$d reviews left to become Restaurant Expert.</string>
     <string name="highest_level_reached">You have reached the highest level.</string>
+    <string name="delete_review_title">Delete Review</string>
+    <string name="delete_review_message">Do you want to permanently delete this review?</string>
+    <string name="delete">Delete</string>
+    <string name="review_login_required">You need to sign in</string>
+    <string name="reviews_header_title">Your Experiences.</string>
+    <string name="reviews_header_subtitle">You shared %1$d reviews in total.</string>
+    <string name="sort_prefix">Sort: %1$s</string>
+    <string name="hide_details">Hide Details</string>
+    <string name="details">Details</string>
+    <string name="rating_point">%.1f points</string>
 </resources>

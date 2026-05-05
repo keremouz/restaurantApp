@@ -123,4 +123,9 @@ object UiConstants {
     val AccountBottomSheetOptionRadius = 16.dp
     val AccountBottomSheetOptionHorizontalPadding = 16.dp
     val AccountBottomSheetOptionVerticalPadding = 14.dp
+    val ReviewDeleteIconButtonSize = 32.dp
+    val ReviewDeleteIconSize = 18.dp
+
+    val ReviewDeleteUnderlineWidth = 14.dp
+    val ReviewDeleteUnderlineHeight = 2.dp
 }

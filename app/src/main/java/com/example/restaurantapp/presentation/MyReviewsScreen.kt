@@ -22,9 +22,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.rounded.FormatQuote
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,6 +38,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -65,19 +70,16 @@ import java.util.Locale
 private val ReviewBg = Color(0xFFF7F8FC)
 private val ReviewCardBg = Color(0xFFFFFFFF)
 private val ReviewCardBorder = Color(0xFFE1E6F5)
-
 private val ReviewTitleColor = Color(0xFF123A9F)
 private val ReviewBodyColor = Color(0xFF3F4A66)
 private val ReviewMutedColor = Color(0xFF7A8299)
 private val ReviewDividerColor = Color(0xFFE7EAF3)
-
 private val ReviewBlue = Color(0xFF244ED8)
 private val ReviewBlueSoft = Color(0xFFEAF0FF)
-
 private val ReviewGold = Color(0xFF9B6B00)
 private val ReviewGoldSoft = Color(0xFFFFF1C2)
-
 private val ReviewMetaPillBg = Color(0xFFF1F4FA)
+private val ReviewDanger = Color(0xFFE53935)
 
 private enum class ReviewSortType(val label: String) {
     NEWEST("En Yeni"),
@@ -105,6 +107,10 @@ fun MyReviewsScreen(
 
     var filterExpanded by remember { mutableStateOf(false) }
     var selectedSort by remember { mutableStateOf(ReviewSortType.NEWEST) }
+    var showDeleteSheet by remember { mutableStateOf(false) }
+    var selectedReview by remember { mutableStateOf<UserComment?>(null) }
+
+    val loginRequiredMessage = stringResource(R.string.review_login_required)
 
     val sortedReviews = remember(reviews, selectedSort) {
         when (selectedSort) {
@@ -139,7 +145,7 @@ fun MyReviewsScreen(
         isLoading = true
 
         if (currentUser == null) {
-            errorMessage = "Giriş yapmanız gerekiyor"
+            errorMessage = loginRequiredMessage
             isLoading = false
             return@LaunchedEffect
         }
@@ -239,12 +245,8 @@ fun MyReviewsScreen(
                             reviewCount = sortedReviews.size,
                             selectedSort = selectedSort,
                             filterExpanded = filterExpanded,
-                            onFilterClick = {
-                                filterExpanded = true
-                            },
-                            onDismissFilter = {
-                                filterExpanded = false
-                            },
+                            onFilterClick = { filterExpanded = true },
+                            onDismissFilter = { filterExpanded = false },
                             onSortSelected = { sortType ->
                                 selectedSort = sortType
                                 filterExpanded = false
@@ -256,8 +258,82 @@ fun MyReviewsScreen(
                         items = sortedReviews,
                         key = { it.commentId }
                     ) { review ->
-                        ReviewArchiveCard(review = review)
+                        ReviewArchiveCard(
+                            review = review,
+                            onDeleteClick = {
+                                selectedReview = review
+                                showDeleteSheet = true
+                            }
+                        )
                     }
+                }
+            }
+        }
+    }
+
+    if (showDeleteSheet && selectedReview != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showDeleteSheet = false
+                selectedReview = null
+            },
+            containerColor = ReviewCardBg
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(UiConstants.BottomSheetPadding),
+                verticalArrangement = Arrangement.spacedBy(UiConstants.BottomSheetSpacing)
+            ) {
+                Text(
+                    text = stringResource(R.string.delete_review_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = ReviewTitleColor
+                )
+
+                Text(
+                    text = stringResource(R.string.delete_review_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = ReviewBodyColor
+                )
+
+                Button(
+                    onClick = {
+                        val reviewToDelete = selectedReview ?: return@Button
+
+                        commentsManager.deleteComment(
+                            commentId = reviewToDelete.commentId,
+                            onSuccess = {
+                                reviews = reviews.filterNot {
+                                    it.commentId == reviewToDelete.commentId
+                                }
+                                showDeleteSheet = false
+                                selectedReview = null
+                            },
+                            onError = { error ->
+                                errorMessage = error
+                                showDeleteSheet = false
+                                selectedReview = null
+                            }
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ReviewDanger),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(UiConstants.ButtonRadius)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        showDeleteSheet = false
+                        selectedReview = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(UiConstants.ButtonRadius)
+                ) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         }
@@ -288,24 +364,22 @@ private fun ReviewsHeader(
                 verticalArrangement = Arrangement.spacedBy(UiConstants.TinySpacing)
             ) {
                 Text(
-                    text = "Deneyimleriniz.",
+                    text = stringResource(R.string.reviews_header_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = ReviewTitleColor
                 )
 
                 Text(
-                    text = "Toplam $reviewCount inceleme paylaştınız.",
+                    text = stringResource(R.string.reviews_header_subtitle, reviewCount),
                     style = MaterialTheme.typography.bodyMedium,
                     color = ReviewMutedColor
                 )
             }
 
-            Box(
-                contentAlignment = Alignment.TopEnd
-            ) {
+            Box(contentAlignment = Alignment.TopEnd) {
                 Text(
-                    text = "Sırala: ${selectedSort.label}",
+                    text = stringResource(R.string.sort_prefix, selectedSort.label),
                     style = MaterialTheme.typography.titleSmall,
                     color = ReviewBlue,
                     fontWeight = FontWeight.Bold,
@@ -321,7 +395,7 @@ private fun ReviewsHeader(
                     expanded = filterExpanded,
                     onDismissRequest = onDismissFilter,
                     containerColor = ReviewCardBg
-                )  {
+                ) {
                     ReviewSortType.values().forEach { sortType ->
                         DropdownMenuItem(
                             text = {
@@ -339,9 +413,7 @@ private fun ReviewsHeader(
                                     }
                                 )
                             },
-                            onClick = {
-                                onSortSelected(sortType)
-                            }
+                            onClick = { onSortSelected(sortType) }
                         )
                     }
                 }
@@ -352,7 +424,8 @@ private fun ReviewsHeader(
 
 @Composable
 private fun ReviewArchiveCard(
-    review: UserComment
+    review: UserComment,
+    onDeleteClick: () -> Unit
 ) {
     var isExpanded by rememberSaveable(review.commentId) { mutableStateOf(false) }
 
@@ -392,12 +465,28 @@ private fun ReviewArchiveCard(
                         color = ReviewTitleColor
                     )
 
-                    SmallMutedText(
-                        text = review.district.ifBlank { "-" }
-                    )
+                    SmallMutedText(text = review.district.ifBlank { "-" })
                 }
 
-                RatingBadge(rating = review.generalRating)
+                Column(
+                    modifier = Modifier.padding(top = UiConstants.TinySpacing),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+                ) {
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier.size(UiConstants.ReviewDeleteIconButtonSize)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = null,
+                            tint = ReviewDanger,
+                            modifier = Modifier.size(UiConstants.ReviewDeleteIconSize)
+                        )
+                    }
+
+                    RatingBadge(rating = review.generalRating)
+                }
             }
 
             Row(
@@ -435,7 +524,11 @@ private fun ReviewArchiveCard(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Text(
-                    text = if (isExpanded) "Detayları Gizle" else "Detaylar",
+                    text = if (isExpanded) {
+                        stringResource(R.string.hide_details)
+                    } else {
+                        stringResource(R.string.details)
+                    },
                     style = MaterialTheme.typography.labelLarge,
                     color = ReviewBlue,
                     fontWeight = FontWeight.SemiBold
@@ -516,7 +609,7 @@ private fun RatingBadge(
             }
 
             Text(
-                text = String.format(Locale.getDefault(), "%.1f puan", rating),
+                text = stringResource(R.string.rating_point, rating),
                 style = MaterialTheme.typography.labelMedium,
                 color = badgeTextColor,
                 fontWeight = FontWeight.Bold

@@ -78,4 +78,17 @@ class CommentsManager(
                 onError(e.message ?: "Yorumlar getirilemedi")
             }
     }
+    fun deleteComment(
+        commentId: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        firestore.collection("comments")
+            .document(commentId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Yorum silinemedi")
+            }
+    }
 }
