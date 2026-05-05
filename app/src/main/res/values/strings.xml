@@ -171,4 +171,16 @@
 
     <string name="cancel">Vazgeç</string>
     <string name="account_deleted">Hesabınız silindi</string>
+    <string name="account_level_sheet_title">Üyelik Seviyeleri</string>
+    <string name="level_range_new_member">0 - 15 değerlendirme</string>
+    <string name="level_range_explorer">16 - 30 değerlendirme</string>
+    <string name="level_range_taste_hunter">31 - 50 değerlendirme</string>
+    <string name="level_range_gourmet">51 - 80 değerlendirme</string>
+    <string name="level_range_restaurant_expert">81+ değerlendirme</string>
+    <string name="current_level">Mevcut</string>
+    <string name="next_level_explorer">%1$d değerlendirme sonra Gezgin olacaksınız.</string>
+    <string name="next_level_taste_hunter">%1$d değerlendirme sonra Mekan Kaşifi olacaksınız.</string>
+    <string name="next_level_gourmet">%1$d değerlendirme sonra Gurme olacaksınız.</string>
+    <string name="next_level_restaurant_expert">%1$d değerlendirme sonra Restoran Uzmanı olacaksınız.</string>
+    <string name="highest_level_reached">En yüksek seviyeye ulaştınız.</string>
 </resources>

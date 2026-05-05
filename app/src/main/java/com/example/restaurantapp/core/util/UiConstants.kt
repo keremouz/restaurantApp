@@ -113,4 +113,14 @@ object UiConstants {
     // BottomSheet
     val BottomSheetPadding = 24.dp
     val BottomSheetSpacing = 16.dp
+    // Account bottom sheets
+    val AccountBottomSheetHorizontalPadding = 24.dp
+    val AccountBottomSheetVerticalPadding = 20.dp
+    val AccountBottomSheetTitleBottomSpacing = 20.dp
+    val AccountBottomSheetSmallSpacing = 10.dp
+    val AccountBottomSheetBottomSpacing = 24.dp
+    val AccountBottomSheetAvatarSize = 64.dp
+    val AccountBottomSheetOptionRadius = 16.dp
+    val AccountBottomSheetOptionHorizontalPadding = 16.dp
+    val AccountBottomSheetOptionVerticalPadding = 14.dp
 }

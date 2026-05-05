@@ -171,4 +171,16 @@
 
     <string name="cancel">Cancel</string>
     <string name="account_deleted">Your account has been deleted</string>
+    <string name="account_level_sheet_title">Membership Levels</string>
+    <string name="level_range_new_member">0 - 15 reviews</string>
+    <string name="level_range_explorer">16 - 30 reviews</string>
+    <string name="level_range_taste_hunter">31 - 50 reviews</string>
+    <string name="level_range_gourmet">51 - 80 reviews</string>
+    <string name="level_range_restaurant_expert">81+ reviews</string>
+    <string name="current_level">Current</string>
+    <string name="next_level_explorer">%1$d reviews left to become Explorer.</string>
+    <string name="next_level_taste_hunter">%1$d reviews left to become Taste Hunter.</string>
+    <string name="next_level_gourmet">%1$d reviews left to become Gourmet.</string>
+    <string name="next_level_restaurant_expert">%1$d reviews left to become Restaurant Expert.</string>
+    <string name="highest_level_reached">You have reached the highest level.</string>
 </resources>

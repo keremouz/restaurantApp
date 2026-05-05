@@ -60,7 +60,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
@@ -108,6 +107,7 @@ fun AccountScreen(
 
     var showAvatarSheet by remember { mutableStateOf(false) }
     var showLanguageSheet by remember { mutableStateOf(false) }
+    var showLevelSheet by remember { mutableStateOf(false) }
 
     var selectedAvatar by remember { mutableIntStateOf(R.drawable.avatar_person) }
     val context = LocalContext.current
@@ -213,7 +213,10 @@ fun AccountScreen(
                         showLanguageSheet = true
                     },
                     onDeleteAccountClick = onDeleteAccountClick,
-                    onLogoutClick = { authManager.signOut() }
+                    onLogoutClick = { authManager.signOut() },
+                    onLevelClick = {
+                        showLevelSheet = true
+                    },
                 )
             }
         }
@@ -221,12 +224,13 @@ fun AccountScreen(
 
     if (showAvatarSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showAvatarSheet = false }
+            onDismissRequest = { showAvatarSheet = false },
+            containerColor = AccountBg
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(UiConstants.BottomSheetPadding)
             ) {
                 Text(
                     text = "Profil Fotoğrafı Seç",
@@ -234,7 +238,7 @@ fun AccountScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(UiConstants.BottomSheetSpacing))
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -245,7 +249,7 @@ fun AccountScreen(
                             painter = painterResource(id = avatar),
                             contentDescription = null,
                             modifier = Modifier
-                                .size(64.dp)
+                                .size(UiConstants.AccountBottomSheetAvatarSize)
                                 .clip(CircleShape)
                                 .clickable {
                                     selectedAvatar = avatar
@@ -255,19 +259,23 @@ fun AccountScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetBottomSpacing))
             }
         }
     }
 
     if (showLanguageSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showLanguageSheet = false }
+            onDismissRequest = { showLanguageSheet = false },
+            containerColor = AccountBg
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 20.dp)
+                    .padding(
+                        horizontal = UiConstants.AccountBottomSheetHorizontalPadding,
+                        vertical = UiConstants.AccountBottomSheetVerticalPadding
+                    )
             ) {
                 Text(
                     text = stringResource(R.string.language_selection),
@@ -276,7 +284,7 @@ fun AccountScreen(
                     color = TextPrimary
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetTitleBottomSpacing))
 
                 LanguageOptionItem(
                     title = "Türkçe (TR)",
@@ -289,7 +297,7 @@ fun AccountScreen(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetSmallSpacing))
 
                 LanguageOptionItem(
                     title = "English (EN)",
@@ -302,9 +310,104 @@ fun AccountScreen(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetBottomSpacing))
             }
         }
+    }
+    if (showLevelSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showLevelSheet = false },
+            containerColor = AccountBg
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = UiConstants.AccountBottomSheetHorizontalPadding,
+                        vertical = UiConstants.AccountBottomSheetVerticalPadding
+                    )
+            ) {
+                Text(
+                    text = stringResource(R.string.account_level_sheet_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+
+                Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
+
+                Text(
+                    text = getNextLevelInfo(reviewCount),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetTitleBottomSpacing))
+
+                LevelInfoItem(stringResource(R.string.level_new_member), stringResource(R.string.level_range_new_member), reviewCount in 0..15)
+                LevelInfoItem(stringResource(R.string.level_explorer), stringResource(R.string.level_range_explorer), reviewCount in 16..30)
+                LevelInfoItem(stringResource(R.string.level_taste_hunter), stringResource(R.string.level_range_taste_hunter), reviewCount in 31..50)
+                LevelInfoItem(stringResource(R.string.level_gourmet), stringResource(R.string.level_range_gourmet), reviewCount in 51..80)
+                LevelInfoItem(stringResource(R.string.level_restaurant_expert), stringResource(R.string.level_range_restaurant_expert), reviewCount >= 81)
+
+                Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetBottomSpacing))
+            }
+        }
+    }
+}
+@Composable
+private fun LevelInfoItem(
+    title: String,
+    subtitle: String,
+    isCurrent: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = if (isCurrent) AvatarBg else Color.Transparent,
+                shape = RoundedCornerShape(UiConstants.AccountBottomSheetOptionRadius)
+            )
+            .padding(
+                horizontal = UiConstants.AccountBottomSheetOptionHorizontalPadding,
+                vertical = UiConstants.AccountBottomSheetOptionVerticalPadding
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                color = TextPrimary
+            )
+
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary
+            )
+        }
+
+        if (isCurrent) {
+            Text(
+                text = stringResource(R.string.current_level),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = AccountBlue
+            )
+        }
+    }
+}
+
+@Composable
+private fun getNextLevelInfo(reviewCount: Int): String {
+    return when {
+        reviewCount <= 15 -> stringResource(R.string.next_level_explorer, 16 - reviewCount)
+        reviewCount <= 30 -> stringResource(R.string.next_level_taste_hunter, 31 - reviewCount)
+        reviewCount <= 50 -> stringResource(R.string.next_level_gourmet, 51 - reviewCount)
+        reviewCount <= 80 -> stringResource(R.string.next_level_restaurant_expert, 81 - reviewCount)
+        else -> stringResource(R.string.highest_level_reached)
     }
 }
 
@@ -318,6 +421,7 @@ private fun LoggedInAccountContent(
     selectedAvatar: Int,
     selectedLanguage: String,
     onAvatarClick: () -> Unit,
+    onLevelClick: () -> Unit,
     onNavigateToMyReviews: () -> Unit,
     onRateAppClick: () -> Unit,
     onLanguageClick: () -> Unit,
@@ -360,7 +464,8 @@ private fun LoggedInAccountContent(
 
         LevelCard(
             levelTitle = levelTitle,
-            reviewCount = reviewCount
+            reviewCount = reviewCount,
+            onClick = onLevelClick
         )
 
         Spacer(modifier = Modifier.height(UiConstants.AccountSectionSpacing))
@@ -549,7 +654,7 @@ private fun ProfileHeader(
                     painter = painterResource(id = selectedAvatar),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(UiConstants.AccountAvatarSize)
                         .clip(CircleShape)
                         .clickable {
                             onAvatarClick()
@@ -598,10 +703,13 @@ private fun ProfileHeader(
 @Composable
 private fun LevelCard(
     levelTitle: String,
-    reviewCount: Int
+    reviewCount: Int,
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(UiConstants.AccountInfoCardRadius),
         colors = CardDefaults.cardColors(containerColor = AccountCardBg),
         elevation = CardDefaults.cardElevation(
@@ -793,10 +901,13 @@ private fun LanguageOptionItem(
             .fillMaxWidth()
             .background(
                 color = if (isSelected) AvatarBg else Color.Transparent,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(UiConstants.AccountBottomSheetOptionRadius)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(
+                horizontal = UiConstants.AccountBottomSheetOptionHorizontalPadding,
+                vertical = UiConstants.AccountBottomSheetOptionVerticalPadding
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
