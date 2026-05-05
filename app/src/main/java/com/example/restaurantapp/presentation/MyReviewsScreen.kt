@@ -319,8 +319,9 @@ private fun ReviewsHeader(
 
                 DropdownMenu(
                     expanded = filterExpanded,
-                    onDismissRequest = onDismissFilter
-                ) {
+                    onDismissRequest = onDismissFilter,
+                    containerColor = ReviewCardBg
+                )  {
                     ReviewSortType.values().forEach { sortType ->
                         DropdownMenuItem(
                             text = {
