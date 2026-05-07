@@ -31,12 +31,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,17 +45,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.FavoriteRestaurant
-import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
 import com.example.restaurantapp.presentation.components.LottieLoadingContent
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
 
 private val FavoritesBg = Color.White
@@ -69,49 +61,27 @@ private val FavoriteBlue = Color(0xFF244ED8)
 private val TitleBlue = Color(0xFF0B2F86)
 private val SoftBlue = Color(0xFF66789E)
 
-private data class FavoriteRatingInfo(
-    val myRating: Double? = null,
-    val generalRating: Double? = null
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
     isConnected: Boolean,
     onRestaurantClick: (Restaurant) -> Unit
 ) {
-    val favoritesManager = remember { FavoritesManager() }
-    val firebaseAuth = remember { FirebaseAuth.getInstance() }
-    val firestore = remember { FirebaseFirestore.getInstance() }
+    val viewModel: FavoritesViewModel = viewModel(
+        factory = FavoritesViewModelFactory()
+    )
+
+    val uiState by viewModel.uiState.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val favorites = remember { mutableStateListOf<FavoriteRestaurant>() }
-
-    var currentUser by remember { mutableStateOf<FirebaseUser?>(firebaseAuth.currentUser) }
-    var favoriteRatings by remember { mutableStateOf<Map<String, FavoriteRatingInfo>>(emptyMap()) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var refreshKey by remember { mutableIntStateOf(0) }
-
-    var isFavoritesLoading by remember { mutableStateOf(false) }
-    var hasLoadedFavorites by remember { mutableStateOf(false) }
-
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            currentUser = auth.currentUser
-            refreshKey++
-        }
-
-        firebaseAuth.addAuthStateListener(listener)
-
-        onDispose {
-            firebaseAuth.removeAuthStateListener(listener)
-        }
+    LaunchedEffect(isConnected) {
+        viewModel.updateConnectionState(isConnected)
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                refreshKey++
+                viewModel.refreshFavorites()
             }
         }
 
@@ -120,64 +90,6 @@ fun FavoritesScreen(
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
-    }
-
-    LaunchedEffect(isConnected, currentUser?.uid, refreshKey) {
-        if (!isConnected) {
-            favorites.clear()
-            favoriteRatings = emptyMap()
-            errorMessage = null
-            isFavoritesLoading = false
-            hasLoadedFavorites = false
-            return@LaunchedEffect
-        }
-
-        val user = currentUser
-
-        if (user == null) {
-            favorites.clear()
-            favoriteRatings = emptyMap()
-            errorMessage = null
-            isFavoritesLoading = false
-            hasLoadedFavorites = false
-            return@LaunchedEffect
-        }
-
-        isFavoritesLoading = true
-        hasLoadedFavorites = false
-
-        favoritesManager.getFavorites(
-            onSuccess = { list ->
-                favorites.clear()
-                favorites.addAll(list)
-                errorMessage = null
-
-                if (list.isEmpty()) {
-                    favoriteRatings = emptyMap()
-                    isFavoritesLoading = false
-                    hasLoadedFavorites = true
-                    return@getFavorites
-                }
-
-                loadFavoriteRatings(
-                    firestore = firestore,
-                    currentUserId = user.uid,
-                    favorites = list,
-                    onLoaded = { ratings ->
-                        favoriteRatings = ratings
-                        isFavoritesLoading = false
-                        hasLoadedFavorites = true
-                    }
-                )
-            },
-            onError = { error ->
-                favorites.clear()
-                favoriteRatings = emptyMap()
-                errorMessage = error
-                isFavoritesLoading = false
-                hasLoadedFavorites = true
-            }
-        )
     }
 
     Scaffold(
@@ -202,20 +114,20 @@ fun FavoritesScreen(
         }
     ) { paddingValues ->
         when {
-            !isConnected -> {
+            !uiState.isConnected -> {
                 ConnectionWarningContent(
                     innerPadding = PaddingValues(),
                     contentPadding = paddingValues
                 )
             }
 
-            currentUser == null -> {
+            !uiState.isLoggedIn -> {
                 FavoritesLoginRequiredContent(
                     modifier = Modifier.padding(paddingValues)
                 )
             }
 
-            isFavoritesLoading || !hasLoadedFavorites -> {
+            uiState.isLoading || !uiState.hasLoadedFavorites -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -229,7 +141,7 @@ fun FavoritesScreen(
                 }
             }
 
-            errorMessage != null -> {
+            uiState.errorMessage != null -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -238,14 +150,14 @@ fun FavoritesScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = errorMessage.orEmpty(),
+                        text = uiState.errorMessage.orEmpty(),
                         color = TitleBlue,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            favorites.isEmpty() -> {
+            uiState.favorites.isEmpty() -> {
                 EmptyFavoritesContent(
                     modifier = Modifier.padding(paddingValues)
                 )
@@ -253,8 +165,8 @@ fun FavoritesScreen(
 
             else -> {
                 FavoritesContent(
-                    favorites = favorites,
-                    ratings = favoriteRatings,
+                    favorites = uiState.favorites,
+                    ratings = uiState.ratings,
                     modifier = Modifier.padding(paddingValues),
                     onRestaurantClick = onRestaurantClick
                 )
@@ -490,116 +402,8 @@ private fun EmptyFavoritesContent(
     }
 }
 
-private fun loadFavoriteRatings(
-    firestore: FirebaseFirestore,
-    currentUserId: String,
-    favorites: List<FavoriteRestaurant>,
-    onLoaded: (Map<String, FavoriteRatingInfo>) -> Unit
-) {
-    if (favorites.isEmpty()) {
-        onLoaded(emptyMap())
-        return
-    }
-
-    firestore.collection("comments")
-        .get()
-        .addOnSuccessListener { documents ->
-            val comments = documents.documents
-            val result = mutableMapOf<String, FavoriteRatingInfo>()
-
-            favorites.forEach { favorite ->
-                val matchedComments = comments.filter { document ->
-                    val commentRestaurantId = document.getString("restaurantId").orEmpty()
-                    val commentRestaurantName = document.getString("restaurantName").orEmpty()
-
-                    val favoritePlaceId = favorite.placeId
-                    val favoriteName = favorite.name
-
-                    commentRestaurantId == favoritePlaceId ||
-                            normalizeText(commentRestaurantName) == normalizeText(favoriteName) ||
-                            normalizeText(commentRestaurantName).contains(normalizeText(favoriteName)) ||
-                            normalizeText(favoriteName).contains(normalizeText(commentRestaurantName))
-                }
-
-                val myRatings = matchedComments
-                    .filter { document ->
-                        document.getString("userId") == currentUserId
-                    }
-                    .mapNotNull { document ->
-                        extractRatingFromComment(document)
-                    }
-
-                val myRating = if (myRatings.isNotEmpty()) {
-                    myRatings.average()
-                } else {
-                    null
-                }
-
-                val allRatings = matchedComments.mapNotNull { document ->
-                    extractRatingFromComment(document)
-                }
-
-                val generalRating = if (allRatings.isNotEmpty()) {
-                    allRatings.average()
-                } else {
-                    null
-                }
-
-                val ratingInfo = FavoriteRatingInfo(
-                    myRating = myRating,
-                    generalRating = generalRating
-                )
-
-                result[favorite.placeId] = ratingInfo
-                result[favorite.name] = ratingInfo
-            }
-
-            onLoaded(result)
-        }
-        .addOnFailureListener {
-            onLoaded(emptyMap())
-        }
-}
-
-private fun extractRatingFromComment(
-    document: DocumentSnapshot
-): Double? {
-    document.getDouble("generalRating")?.let { return it }
-    document.getDouble("rating")?.let { return it }
-
-    val ratingsMap = document.get("ratings") as? Map<*, *>
-    val ratingValues = ratingsMap
-        ?.values
-        ?.mapNotNull { value ->
-            when (value) {
-                is Number -> value.toDouble()
-                else -> null
-            }
-        }
-        .orEmpty()
-
-    return if (ratingValues.isNotEmpty()) {
-        ratingValues.average()
-    } else {
-        null
-    }
-}
-
 private fun formatRating(value: Double?): String {
     return value?.let {
         String.format(Locale.getDefault(), "%.1f", it)
     } ?: "-"
-}
-
-private fun normalizeText(value: String): String {
-    return value
-        .lowercase()
-        .replace("ı", "i")
-        .replace("ğ", "g")
-        .replace("ü", "u")
-        .replace("ş", "s")
-        .replace("ö", "o")
-        .replace("ç", "c")
-        .replace(Regex("\\s+"), " ")
-        .trim()
 }
