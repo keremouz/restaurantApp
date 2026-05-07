@@ -47,7 +47,7 @@ class MapViewModel(
         loadRestaurants()
     }
 
-    fun loadRestaurants() {
+    private fun loadRestaurants() {
         if (!_uiState.value.isConnected) {
             _uiState.update { currentState ->
                 currentState.copy(
