@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,6 +46,7 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
+import com.example.restaurantapp.presentation.components.LottieLoadingContent
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -161,9 +161,9 @@ fun MapScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = MapIconBlue,
-                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth
+                    LottieLoadingContent(
+                        animationRes = R.raw.restaurant_loading,
+                        text = stringResource(R.string.loading_restaurants)
                     )
                 }
             }

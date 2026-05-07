@@ -30,7 +30,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +62,7 @@ import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.CommentsManager
 import com.example.restaurantapp.data.firebase.UserComment
+import com.example.restaurantapp.presentation.components.LottieLoadingContent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import java.util.Locale
@@ -193,9 +193,9 @@ fun MyReviewsScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = ReviewBlue,
-                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth
+                    LottieLoadingContent(
+                        animationRes = R.raw.restaurant_loading,
+                        text = stringResource(R.string.loading_reviews)
                     )
                 }
             }

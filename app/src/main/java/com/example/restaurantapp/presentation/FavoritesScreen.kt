@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +55,7 @@ import com.example.restaurantapp.data.firebase.FavoriteRestaurant
 import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
+import com.example.restaurantapp.presentation.components.LottieLoadingContent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
@@ -222,9 +222,9 @@ fun FavoritesScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        color = FavoriteBlue,
-                        strokeWidth = UiConstants.LoadingIndicatorStrokeWidth
+                    LottieLoadingContent(
+                        animationRes = R.raw.restaurant_loading,
+                        text = stringResource(R.string.loading_favorites)
                     )
                 }
             }

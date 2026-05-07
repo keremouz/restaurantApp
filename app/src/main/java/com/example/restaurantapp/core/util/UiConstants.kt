@@ -126,6 +126,5 @@ object UiConstants {
     val ReviewDeleteIconButtonSize = 32.dp
     val ReviewDeleteIconSize = 18.dp
 
-    val ReviewDeleteUnderlineWidth = 14.dp
-    val ReviewDeleteUnderlineHeight = 2.dp
+    val LottieLoadingSize = 190.dp
 }

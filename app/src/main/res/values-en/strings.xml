@@ -193,4 +193,8 @@
     <string name="hide_details">Hide Details</string>
     <string name="details">Details</string>
     <string name="rating_point">%.1f points</string>
+    <string name="loading_restaurants">Restoranlar yükleniyor...</string>
+    <string name="loading_reviews">Yorumlar yükleniyor...</string>
+    <string name="loading_favorites">Favoriler yükleniyor...</string>
+    <string name="loading_restaurant_detail">Restoran bilgileri yükleniyor...</string>
 </resources>
