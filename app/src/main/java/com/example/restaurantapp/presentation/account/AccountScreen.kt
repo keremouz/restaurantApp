@@ -1,5 +1,6 @@
 package com.example.restaurantapp.presentation.account
 
+import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,33 +44,25 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.R
-import com.example.restaurantapp.core.util.UiConstants
-import com.example.restaurantapp.data.firebase.AuthManager
-import com.example.restaurantapp.presentation.components.ConnectionWarningContent
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.FirebaseFirestore
-import android.app.Activity
-import androidx.compose.ui.platform.LocalContext
 import com.example.restaurantapp.core.util.LocaleHelper
+import com.example.restaurantapp.core.util.UiConstants
+import com.example.restaurantapp.presentation.components.ConnectionWarningContent
 
 private val AccountBlue = Color(0xFF2F5BFF)
 private val AccountBg = Color.White
@@ -96,24 +89,19 @@ fun AccountScreen(
     onLanguageClick: () -> Unit,
     onDeleteAccountClick: () -> Unit
 ) {
-    val authManager = remember { AuthManager() }
-    val firebaseAuth = remember { FirebaseAuth.getInstance() }
-    val firestore = remember { FirebaseFirestore.getInstance() }
+    val viewModel: AccountViewModel = viewModel(
+        factory = AccountViewModelFactory()
+    )
 
-    var currentUser by remember { mutableStateOf<FirebaseUser?>(firebaseAuth.currentUser) }
-    var fullName by remember { mutableStateOf("") }
-    var reviewCount by remember { mutableIntStateOf(0) }
-    var favoriteCount by remember { mutableIntStateOf(0) }
-
-    var showAvatarSheet by remember { mutableStateOf(false) }
-    var showLanguageSheet by remember { mutableStateOf(false) }
-    var showLevelSheet by remember { mutableStateOf(false) }
-
-    var selectedAvatar by remember { mutableIntStateOf(R.drawable.avatar_person) }
+    val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    var selectedLanguage by remember {
-        mutableStateOf(
+    LaunchedEffect(isConnected) {
+        viewModel.updateConnectionState(isConnected)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.setSelectedLanguage(
             if (LocaleHelper.getLanguage(context) == "en") {
                 "English (EN)"
             } else {
@@ -122,71 +110,19 @@ fun AccountScreen(
         )
     }
 
-    val avatars = listOf(
-        R.drawable.avatar_person,
-        R.drawable.avatar_woman,
-        R.drawable.avatar_chef,
-        R.drawable.avatar_burger,
-        R.drawable.avatar_crown
-    )
-
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            currentUser = auth.currentUser
-        }
-
-        firebaseAuth.addAuthStateListener(listener)
-
-        onDispose {
-            firebaseAuth.removeAuthStateListener(listener)
-        }
-    }
-
-    LaunchedEffect(currentUser?.uid, isConnected) {
-        fullName = ""
-        reviewCount = 0
-        favoriteCount = 0
-
-        if (!isConnected) return@LaunchedEffect
-
-        val uid = currentUser?.uid ?: return@LaunchedEffect
-
-        firestore.collection("users")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { document ->
-                fullName = document.getString("fullName").orEmpty()
-            }
-
-        firestore.collection("comments")
-            .whereEqualTo("userId", uid)
-            .get()
-            .addOnSuccessListener { documents ->
-                reviewCount = documents.size()
-            }
-
-        firestore.collection("users")
-            .document(uid)
-            .collection("favorites")
-            .get()
-            .addOnSuccessListener { documents ->
-                favoriteCount = documents.size()
-            }
-    }
-
     Scaffold(
         containerColor = AccountBg,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         when {
-            !isConnected -> {
+            !uiState.isConnected -> {
                 ConnectionWarningContent(
                     innerPadding = PaddingValues(),
                     contentPadding = paddingValues
                 )
             }
 
-            currentUser == null -> {
+            uiState.currentUser == null -> {
                 GuestAccountContent(
                     paddingValues = paddingValues,
                     onNavigateToLogin = onNavigateToLogin,
@@ -197,34 +133,40 @@ fun AccountScreen(
             else -> {
                 LoggedInAccountContent(
                     paddingValues = paddingValues,
-                    fullName = fullName.ifBlank { stringResource(R.string.unknown_user) },
-                    email = currentUser?.email ?: "-",
-                    reviewCount = reviewCount,
-                    favoriteCount = favoriteCount,
-                    selectedAvatar = selectedAvatar,
-                    selectedLanguage = selectedLanguage,
+                    fullName = uiState.fullName.ifBlank {
+                        stringResource(R.string.unknown_user)
+                    },
+                    email = uiState.currentUser?.email ?: "-",
+                    reviewCount = uiState.reviewCount,
+                    favoriteCount = uiState.favoriteCount,
+                    selectedAvatar = uiState.selectedAvatar,
+                    selectedLanguage = uiState.selectedLanguage,
                     onAvatarClick = {
-                        showAvatarSheet = true
+                        viewModel.showAvatarSheet()
                     },
                     onNavigateToMyReviews = onNavigateToMyReviews,
                     onRateAppClick = onRateAppClick,
                     onLanguageClick = {
                         onLanguageClick()
-                        showLanguageSheet = true
+                        viewModel.showLanguageSheet()
                     },
                     onDeleteAccountClick = onDeleteAccountClick,
-                    onLogoutClick = { authManager.signOut() },
-                    onLevelClick = {
-                        showLevelSheet = true
+                    onLogoutClick = {
+                        viewModel.logout()
                     },
+                    onLevelClick = {
+                        viewModel.showLevelSheet()
+                    }
                 )
             }
         }
     }
 
-    if (showAvatarSheet) {
+    if (uiState.showAvatarSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showAvatarSheet = false },
+            onDismissRequest = {
+                viewModel.hideAvatarSheet()
+            },
             containerColor = AccountBg
         ) {
             Column(
@@ -244,7 +186,7 @@ fun AccountScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    avatars.forEach { avatar ->
+                    viewModel.avatars.forEach { avatar ->
                         Image(
                             painter = painterResource(id = avatar),
                             contentDescription = null,
@@ -252,8 +194,7 @@ fun AccountScreen(
                                 .size(UiConstants.AccountBottomSheetAvatarSize)
                                 .clip(CircleShape)
                                 .clickable {
-                                    selectedAvatar = avatar
-                                    showAvatarSheet = false
+                                    viewModel.selectAvatar(avatar)
                                 }
                         )
                     }
@@ -264,9 +205,11 @@ fun AccountScreen(
         }
     }
 
-    if (showLanguageSheet) {
+    if (uiState.showLanguageSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showLanguageSheet = false },
+            onDismissRequest = {
+                viewModel.hideLanguageSheet()
+            },
             containerColor = AccountBg
         ) {
             Column(
@@ -288,11 +231,10 @@ fun AccountScreen(
 
                 LanguageOptionItem(
                     title = "Türkçe (TR)",
-                    isSelected = selectedLanguage == "Türkçe (TR)",
+                    isSelected = uiState.selectedLanguage == "Türkçe (TR)",
                     onClick = {
-                        selectedLanguage = "Türkçe (TR)"
+                        viewModel.selectLanguage("Türkçe (TR)")
                         LocaleHelper.setLanguage(context, "tr")
-                        showLanguageSheet = false
                         (context as? Activity)?.recreate()
                     }
                 )
@@ -301,11 +243,10 @@ fun AccountScreen(
 
                 LanguageOptionItem(
                     title = "English (EN)",
-                    isSelected = selectedLanguage == "English (EN)",
+                    isSelected = uiState.selectedLanguage == "English (EN)",
                     onClick = {
-                        selectedLanguage = "English (EN)"
+                        viewModel.selectLanguage("English (EN)")
                         LocaleHelper.setLanguage(context, "en")
-                        showLanguageSheet = false
                         (context as? Activity)?.recreate()
                     }
                 )
@@ -314,9 +255,12 @@ fun AccountScreen(
             }
         }
     }
-    if (showLevelSheet) {
+
+    if (uiState.showLevelSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showLevelSheet = false },
+            onDismissRequest = {
+                viewModel.hideLevelSheet()
+            },
             containerColor = AccountBg
         ) {
             Column(
@@ -337,24 +281,49 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
 
                 Text(
-                    text = getNextLevelInfo(reviewCount),
+                    text = getNextLevelInfo(uiState.reviewCount),
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary
                 )
 
                 Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetTitleBottomSpacing))
 
-                LevelInfoItem(stringResource(R.string.level_new_member), stringResource(R.string.level_range_new_member), reviewCount in 0..15)
-                LevelInfoItem(stringResource(R.string.level_explorer), stringResource(R.string.level_range_explorer), reviewCount in 16..30)
-                LevelInfoItem(stringResource(R.string.level_taste_hunter), stringResource(R.string.level_range_taste_hunter), reviewCount in 31..50)
-                LevelInfoItem(stringResource(R.string.level_gourmet), stringResource(R.string.level_range_gourmet), reviewCount in 51..80)
-                LevelInfoItem(stringResource(R.string.level_restaurant_expert), stringResource(R.string.level_range_restaurant_expert), reviewCount >= 81)
+                LevelInfoItem(
+                    title = stringResource(R.string.level_new_member),
+                    subtitle = stringResource(R.string.level_range_new_member),
+                    isCurrent = uiState.reviewCount in 0..15
+                )
+
+                LevelInfoItem(
+                    title = stringResource(R.string.level_explorer),
+                    subtitle = stringResource(R.string.level_range_explorer),
+                    isCurrent = uiState.reviewCount in 16..30
+                )
+
+                LevelInfoItem(
+                    title = stringResource(R.string.level_taste_hunter),
+                    subtitle = stringResource(R.string.level_range_taste_hunter),
+                    isCurrent = uiState.reviewCount in 31..50
+                )
+
+                LevelInfoItem(
+                    title = stringResource(R.string.level_gourmet),
+                    subtitle = stringResource(R.string.level_range_gourmet),
+                    isCurrent = uiState.reviewCount in 51..80
+                )
+
+                LevelInfoItem(
+                    title = stringResource(R.string.level_restaurant_expert),
+                    subtitle = stringResource(R.string.level_range_restaurant_expert),
+                    isCurrent = uiState.reviewCount >= 81
+                )
 
                 Spacer(modifier = Modifier.height(UiConstants.AccountBottomSheetBottomSpacing))
             }
         }
     }
 }
+
 @Composable
 private fun LevelInfoItem(
     title: String,
@@ -890,6 +859,7 @@ private fun AccountMenuItem(
         )
     }
 }
+
 @Composable
 private fun LanguageOptionItem(
     title: String,
