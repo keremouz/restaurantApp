@@ -44,13 +44,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -58,13 +55,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
-import com.example.restaurantapp.data.firebase.CommentsManager
 import com.example.restaurantapp.data.firebase.UserComment
 import com.example.restaurantapp.presentation.components.LottieLoadingContent
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import java.util.Locale
 
 private val ReviewBg = Color(0xFFF7F8FC)
@@ -81,86 +76,17 @@ private val ReviewGoldSoft = Color(0xFFFFF1C2)
 private val ReviewMetaPillBg = Color(0xFFF1F4FA)
 private val ReviewDanger = Color(0xFFE53935)
 
-private enum class ReviewSortType(val label: String) {
-    NEWEST("En Yeni"),
-    OLDEST("En Eski"),
-    GENERAL("Genel Puan"),
-    TASTE("Lezzet"),
-    SERVICE("Servis"),
-    PRICE_PERFORMANCE("Fiyat / Performans"),
-    ATMOSPHERE("Atmosfer"),
-    LOCATION("Konum")
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyReviewsScreen(
     onBackClick: () -> Unit
 ) {
-    val commentsManager = remember { CommentsManager() }
-    val firebaseAuth = remember { FirebaseAuth.getInstance() }
+    val viewModel: MyReviewsViewModel = viewModel(
+        factory = MyReviewsViewModelFactory()
+    )
 
-    var currentUser by remember { mutableStateOf<FirebaseUser?>(firebaseAuth.currentUser) }
-    var reviews by remember { mutableStateOf<List<UserComment>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    var filterExpanded by remember { mutableStateOf(false) }
-    var selectedSort by remember { mutableStateOf(ReviewSortType.NEWEST) }
-    var showDeleteSheet by remember { mutableStateOf(false) }
-    var selectedReview by remember { mutableStateOf<UserComment?>(null) }
-
-    val loginRequiredMessage = stringResource(R.string.review_login_required)
-
-    val sortedReviews = remember(reviews, selectedSort) {
-        when (selectedSort) {
-            ReviewSortType.NEWEST -> reviews.sortedByDescending { it.createdAt }
-            ReviewSortType.OLDEST -> reviews.sortedBy { it.createdAt }
-            ReviewSortType.GENERAL -> reviews.sortedByDescending { it.generalRating }
-            ReviewSortType.TASTE -> reviews.sortedByDescending { it.ratings.taste }
-            ReviewSortType.SERVICE -> reviews.sortedByDescending { it.ratings.service }
-            ReviewSortType.PRICE_PERFORMANCE -> reviews.sortedByDescending {
-                it.ratings.pricePerformance
-            }
-            ReviewSortType.ATMOSPHERE -> reviews.sortedByDescending { it.ratings.atmosphere }
-            ReviewSortType.LOCATION -> reviews.sortedByDescending { it.ratings.location }
-        }
-    }
-
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            currentUser = auth.currentUser
-        }
-
-        firebaseAuth.addAuthStateListener(listener)
-
-        onDispose {
-            firebaseAuth.removeAuthStateListener(listener)
-        }
-    }
-
-    LaunchedEffect(currentUser?.uid) {
-        reviews = emptyList()
-        errorMessage = null
-        isLoading = true
-
-        if (currentUser == null) {
-            errorMessage = loginRequiredMessage
-            isLoading = false
-            return@LaunchedEffect
-        }
-
-        commentsManager.getCurrentUserComments(
-            onSuccess = { commentList ->
-                reviews = commentList
-                isLoading = false
-            },
-            onError = { error ->
-                errorMessage = error
-                isLoading = false
-            }
-        )
-    }
+    val uiState by viewModel.uiState.collectAsState()
+    val sortedReviews = viewModel.getSortedReviews()
 
     Scaffold(
         containerColor = ReviewBg,
@@ -186,7 +112,7 @@ fun MyReviewsScreen(
         }
     ) { paddingValues ->
         when {
-            isLoading -> {
+            uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -200,7 +126,7 @@ fun MyReviewsScreen(
                 }
             }
 
-            errorMessage != null -> {
+            uiState.errorMessage != null -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -209,14 +135,14 @@ fun MyReviewsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = errorMessage.orEmpty(),
+                        text = uiState.errorMessage.orEmpty(),
                         style = MaterialTheme.typography.bodyLarge,
                         color = ReviewTitleColor
                     )
                 }
             }
 
-            reviews.isEmpty() -> {
+            uiState.reviews.isEmpty() -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -243,14 +169,11 @@ fun MyReviewsScreen(
                     item {
                         ReviewsHeader(
                             reviewCount = sortedReviews.size,
-                            selectedSort = selectedSort,
-                            filterExpanded = filterExpanded,
-                            onFilterClick = { filterExpanded = true },
-                            onDismissFilter = { filterExpanded = false },
-                            onSortSelected = { sortType ->
-                                selectedSort = sortType
-                                filterExpanded = false
-                            }
+                            selectedSort = uiState.selectedSort,
+                            filterExpanded = uiState.filterExpanded,
+                            onFilterClick = viewModel::onFilterClick,
+                            onDismissFilter = viewModel::onDismissFilter,
+                            onSortSelected = viewModel::onSortSelected
                         )
                     }
 
@@ -261,8 +184,7 @@ fun MyReviewsScreen(
                         ReviewArchiveCard(
                             review = review,
                             onDeleteClick = {
-                                selectedReview = review
-                                showDeleteSheet = true
+                                viewModel.onDeleteClick(review)
                             }
                         )
                     }
@@ -271,12 +193,9 @@ fun MyReviewsScreen(
         }
     }
 
-    if (showDeleteSheet && selectedReview != null) {
+    if (uiState.showDeleteSheet && uiState.selectedReview != null) {
         ModalBottomSheet(
-            onDismissRequest = {
-                showDeleteSheet = false
-                selectedReview = null
-            },
+            onDismissRequest = viewModel::dismissDeleteSheet,
             containerColor = ReviewCardBg
         ) {
             Column(
@@ -299,25 +218,7 @@ fun MyReviewsScreen(
                 )
 
                 Button(
-                    onClick = {
-                        val reviewToDelete = selectedReview ?: return@Button
-
-                        commentsManager.deleteComment(
-                            commentId = reviewToDelete.commentId,
-                            onSuccess = {
-                                reviews = reviews.filterNot {
-                                    it.commentId == reviewToDelete.commentId
-                                }
-                                showDeleteSheet = false
-                                selectedReview = null
-                            },
-                            onError = { error ->
-                                errorMessage = error
-                                showDeleteSheet = false
-                                selectedReview = null
-                            }
-                        )
-                    },
+                    onClick = viewModel::deleteSelectedReview,
                     colors = ButtonDefaults.buttonColors(containerColor = ReviewDanger),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(UiConstants.ButtonRadius)
@@ -326,10 +227,7 @@ fun MyReviewsScreen(
                 }
 
                 OutlinedButton(
-                    onClick = {
-                        showDeleteSheet = false
-                        selectedReview = null
-                    },
+                    onClick = viewModel::dismissDeleteSheet,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(UiConstants.ButtonRadius)
                 ) {
@@ -427,13 +325,15 @@ private fun ReviewArchiveCard(
     review: UserComment,
     onDeleteClick: () -> Unit
 ) {
-    var isExpanded by rememberSaveable(review.commentId) { mutableStateOf(false) }
+    val isExpanded = rememberSaveable(review.commentId) {
+        mutableStateOf(false)
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
-            .clickable { isExpanded = !isExpanded },
+            .clickable { isExpanded.value = !isExpanded.value },
         shape = RoundedCornerShape(UiConstants.CardRadius),
         colors = CardDefaults.cardColors(containerColor = ReviewCardBg),
         border = BorderStroke(
@@ -524,7 +424,7 @@ private fun ReviewArchiveCard(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Text(
-                    text = if (isExpanded) {
+                    text = if (isExpanded.value) {
                         stringResource(R.string.hide_details)
                     } else {
                         stringResource(R.string.details)
@@ -540,11 +440,11 @@ private fun ReviewArchiveCard(
                     imageVector = Icons.Outlined.ChevronRight,
                     contentDescription = null,
                     tint = ReviewBlue,
-                    modifier = Modifier.rotate(if (isExpanded) 90f else 0f)
+                    modifier = Modifier.rotate(if (isExpanded.value) 90f else 0f)
                 )
             }
 
-            AnimatedVisibility(visible = isExpanded) {
+            AnimatedVisibility(visible = isExpanded.value) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
