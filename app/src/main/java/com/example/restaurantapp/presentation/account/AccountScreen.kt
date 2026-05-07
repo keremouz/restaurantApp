@@ -1,4 +1,4 @@
-package com.example.restaurantapp.presentation
+package com.example.restaurantapp.presentation.account
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

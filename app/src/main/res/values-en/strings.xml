@@ -197,4 +197,5 @@
     <string name="loading_reviews">Yorumlar yükleniyor...</string>
     <string name="loading_favorites">Favoriler yükleniyor...</string>
     <string name="loading_restaurant_detail">Restoran bilgileri yükleniyor...</string>
+    <string name="favorite_removed">Removed from favorites</string>
 </resources>

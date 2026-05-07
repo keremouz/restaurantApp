@@ -26,8 +26,8 @@ import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
-import com.example.restaurantapp.presentation.AccountScreen
-import com.example.restaurantapp.presentation.FavoritesScreen
+import com.example.restaurantapp.presentation.account.AccountScreen
+import com.example.restaurantapp.presentation.favorites.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
 import kotlinx.coroutines.launch
 

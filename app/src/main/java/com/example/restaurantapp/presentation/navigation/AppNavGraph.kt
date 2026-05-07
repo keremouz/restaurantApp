@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
-import com.example.restaurantapp.presentation.MyReviewsScreen
+import com.example.restaurantapp.presentation.reviews.MyReviewsScreen
 import com.example.restaurantapp.presentation.auth.LoginScreen
 import com.example.restaurantapp.presentation.auth.RegisterScreen
 import com.example.restaurantapp.presentation.restaurant.RestaurantDetailScreen

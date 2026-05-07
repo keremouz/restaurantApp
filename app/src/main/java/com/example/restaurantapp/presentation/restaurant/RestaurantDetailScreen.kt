@@ -37,11 +37,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,13 +46,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
-import com.example.restaurantapp.data.firebase.CommentRatings
-import com.example.restaurantapp.data.firebase.CommentsManager
-import com.example.restaurantapp.data.firebase.FavoritesManager
 import com.example.restaurantapp.domain.model.Restaurant
-import com.google.firebase.auth.FirebaseAuth
 import java.util.Locale
 
 private val DetailBlue = Color(0xFF2F5BFF)
@@ -74,142 +68,22 @@ fun RestaurantDetailScreen(
     onBackClick: () -> Unit,
     onRequireLogin: () -> Unit
 ) {
-    val firebaseAuth = remember { FirebaseAuth.getInstance() }
-    val commentsManager = remember { CommentsManager() }
-    val favoritesManager = remember { FavoritesManager() }
+    val viewModel: RestaurantDetailViewModel = viewModel(
+        factory = RestaurantDetailViewModelFactory(restaurant)
+    )
 
-    val currentUser = firebaseAuth.currentUser
-
-    var message by remember { mutableStateOf<String?>(null) }
-    var commentText by remember { mutableStateOf("") }
-    var isFavorite by remember { mutableStateOf(false) }
-    var averageRating by remember { mutableStateOf<Double?>(null) }
-
-    var tasteRating by remember { mutableIntStateOf(0) }
-    var serviceRating by remember { mutableIntStateOf(0) }
-    var pricePerformanceRating by remember { mutableIntStateOf(0) }
-    var atmosphereRating by remember { mutableIntStateOf(0) }
-    var locationRating by remember { mutableIntStateOf(0) }
+    val uiState by viewModel.uiState.collectAsState()
 
     val fillReviewFieldsText = stringResource(R.string.fill_review_fields)
     val commentAddedText = stringResource(R.string.comment_added)
     val favoriteAddedText = stringResource(R.string.favorite_added)
-    val favoriteRemovedText = "Favorilerden çıkarıldı"
+    val favoriteRemovedText = stringResource(R.string.favorite_removed)
 
-    LaunchedEffect(restaurant.placeId, currentUser?.uid) {
-        commentsManager.getRestaurantAverageRating(
-            restaurantId = restaurant.placeId,
-            restaurantName = restaurant.name,
-            onSuccess = { rating ->
-                averageRating = rating
-            },
-            onError = {
-                averageRating = null
-            }
-        )
-
-        if (currentUser != null) {
-            favoritesManager.isFavorite(
-                restaurantId = restaurant.placeId,
-                onSuccess = { favorite ->
-                    isFavorite = favorite
-                },
-                onError = {
-                    isFavorite = false
-                }
-            )
-        } else {
-            isFavorite = false
-        }
-    }
-
-    fun toggleFavorite() {
-        if (currentUser == null) {
+    LaunchedEffect(uiState.requireLogin) {
+        if (uiState.requireLogin) {
             onRequireLogin()
-            return
+            viewModel.clearRequireLogin()
         }
-
-        if (isFavorite) {
-            favoritesManager.removeFavorite(
-                restaurantId = restaurant.placeId,
-                onSuccess = {
-                    isFavorite = false
-                    message = favoriteRemovedText
-                },
-                onError = { error ->
-                    message = error
-                }
-            )
-        } else {
-            favoritesManager.addFavorite(
-                restaurant = restaurant,
-                onSuccess = {
-                    isFavorite = true
-                    message = favoriteAddedText
-                },
-                onError = { error ->
-                    message = error
-                }
-            )
-        }
-    }
-
-    fun submitReview() {
-        if (currentUser == null) {
-            onRequireLogin()
-            return
-        }
-
-        if (
-            commentText.isBlank() ||
-            tasteRating == 0 ||
-            serviceRating == 0 ||
-            pricePerformanceRating == 0 ||
-            atmosphereRating == 0 ||
-            locationRating == 0
-        ) {
-            message = fillReviewFieldsText
-            return
-        }
-
-        val ratings = CommentRatings(
-            taste = tasteRating,
-            service = serviceRating,
-            pricePerformance = pricePerformanceRating,
-            atmosphere = atmosphereRating,
-            location = locationRating
-        )
-
-        commentsManager.addComment(
-            restaurantId = restaurant.placeId,
-            restaurantName = restaurant.name,
-            district = extractDistrict(restaurant.address),
-            comment = commentText.trim(),
-            ratings = ratings,
-            onSuccess = {
-                message = commentAddedText
-                commentText = ""
-                tasteRating = 0
-                serviceRating = 0
-                pricePerformanceRating = 0
-                atmosphereRating = 0
-                locationRating = 0
-
-                commentsManager.getRestaurantAverageRating(
-                    restaurantId = restaurant.placeId,
-                    restaurantName = restaurant.name,
-                    onSuccess = { rating ->
-                        averageRating = rating
-                    },
-                    onError = {
-                        averageRating = null
-                    }
-                )
-            },
-            onError = { error ->
-                message = error
-            }
-        )
     }
 
     Scaffold(
@@ -234,9 +108,16 @@ fun RestaurantDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { toggleFavorite() }) {
+                    IconButton(
+                        onClick = {
+                            viewModel.toggleFavorite(
+                                favoriteAddedText = favoriteAddedText,
+                                favoriteRemovedText = favoriteRemovedText
+                            )
+                        }
+                    ) {
                         Icon(
-                            imageVector = if (isFavorite) {
+                            imageVector = if (uiState.isFavorite) {
                                 Icons.Filled.Favorite
                             } else {
                                 Icons.Outlined.FavoriteBorder
@@ -246,7 +127,14 @@ fun RestaurantDetailScreen(
                         )
                     }
 
-                    TextButton(onClick = { submitReview() }) {
+                    TextButton(
+                        onClick = {
+                            viewModel.submitReview(
+                                fillReviewFieldsText = fillReviewFieldsText,
+                                commentAddedText = commentAddedText
+                            )
+                        }
+                    ) {
                         Text(
                             text = stringResource(R.string.submit),
                             color = DetailBlue,
@@ -289,7 +177,7 @@ fun RestaurantDetailScreen(
                 Spacer(modifier = Modifier.size(UiConstants.SmallSpacing))
 
                 Text(
-                    text = averageRating?.let { rating ->
+                    text = uiState.averageRating?.let { rating ->
                         "${String.format(Locale.getDefault(), "%.1f", rating)} puan"
                     } ?: "-",
                     style = MaterialTheme.typography.titleMedium,
@@ -322,11 +210,11 @@ fun RestaurantDetailScreen(
                 )
             }
 
-            message?.let {
+            uiState.message?.let { message ->
                 Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
                 Text(
-                    text = it,
+                    text = message,
                     color = DetailBlueDark,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
@@ -363,45 +251,45 @@ fun RestaurantDetailScreen(
 
                     RatingSection(
                         title = stringResource(R.string.criterion_taste),
-                        rating = tasteRating,
-                        label = getTasteLabel(tasteRating),
-                        onRatingChanged = { tasteRating = it }
+                        rating = uiState.tasteRating,
+                        label = getTasteLabel(uiState.tasteRating),
+                        onRatingChanged = viewModel::updateTasteRating
                     )
 
                     Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
                     RatingSection(
                         title = stringResource(R.string.criterion_service),
-                        rating = serviceRating,
-                        label = getDefaultRatingLabel(serviceRating),
-                        onRatingChanged = { serviceRating = it }
+                        rating = uiState.serviceRating,
+                        label = getDefaultRatingLabel(uiState.serviceRating),
+                        onRatingChanged = viewModel::updateServiceRating
                     )
 
                     Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
                     RatingSection(
                         title = stringResource(R.string.criterion_price_performance),
-                        rating = pricePerformanceRating,
-                        label = getPricePerformanceLabel(pricePerformanceRating),
-                        onRatingChanged = { pricePerformanceRating = it }
+                        rating = uiState.pricePerformanceRating,
+                        label = getPricePerformanceLabel(uiState.pricePerformanceRating),
+                        onRatingChanged = viewModel::updatePricePerformanceRating
                     )
 
                     Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
                     RatingSection(
                         title = stringResource(R.string.criterion_atmosphere),
-                        rating = atmosphereRating,
-                        label = getAtmosphereLabel(atmosphereRating),
-                        onRatingChanged = { atmosphereRating = it }
+                        rating = uiState.atmosphereRating,
+                        label = getAtmosphereLabel(uiState.atmosphereRating),
+                        onRatingChanged = viewModel::updateAtmosphereRating
                     )
 
                     Spacer(modifier = Modifier.height(UiConstants.ContentSpacing))
 
                     RatingSection(
                         title = stringResource(R.string.criterion_location),
-                        rating = locationRating,
-                        label = getLocationLabel(locationRating),
-                        onRatingChanged = { locationRating = it }
+                        rating = uiState.locationRating,
+                        label = getLocationLabel(uiState.locationRating),
+                        onRatingChanged = viewModel::updateLocationRating
                     )
                 }
             }
@@ -418,8 +306,8 @@ fun RestaurantDetailScreen(
             Spacer(modifier = Modifier.height(UiConstants.SmallSpacing))
 
             OutlinedTextField(
-                value = commentText,
-                onValueChange = { commentText = it },
+                value = uiState.commentText,
+                onValueChange = viewModel::updateCommentText,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(UiConstants.ReviewCommentFieldHeight),
@@ -554,25 +442,5 @@ private fun getLocationLabel(rating: Int): String {
         4 -> stringResource(R.string.rating_easy)
         5 -> stringResource(R.string.rating_central)
         else -> stringResource(R.string.rating_select)
-    }
-}
-
-private fun extractDistrict(address: String): String {
-    val slashParts = address.split("/")
-        .map { it.trim() }
-        .filter { it.isNotBlank() }
-
-    if (slashParts.size >= 2) {
-        return slashParts[slashParts.lastIndex - 1]
-    }
-
-    val commaParts = address.split(",")
-        .map { it.trim() }
-        .filter { it.isNotBlank() }
-
-    return if (commaParts.size >= 2) {
-        commaParts[commaParts.lastIndex - 1]
-    } else {
-        address
     }
 }

@@ -1,4 +1,4 @@
-package com.example.restaurantapp.presentation
+package com.example.restaurantapp.presentation.reviews
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
