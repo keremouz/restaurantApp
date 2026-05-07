@@ -58,6 +58,8 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material3.FloatingActionButton
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
@@ -85,8 +87,9 @@ private val MapCategories = listOf(
 @Composable
 fun MapScreen(
     isConnected: Boolean,
-    onRestaurantClick: (Restaurant) -> Unit
-) {
+    onRestaurantClick: (Restaurant) -> Unit,
+    onChatBotClick: () -> Unit
+){
     val repository = remember {
         RestaurantRepositoryImpl(
             placesApiService = RetrofitProvider.placesApiService,
@@ -207,62 +210,80 @@ fun MapScreen(
             }
 
             else -> {
-                GoogleMap(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    cameraPositionState = cameraPositionState,
-                    properties = mapProperties,
-                    uiSettings = mapUiSettings
+                        .padding(paddingValues)
                 ) {
-                    Clustering(
-                        items = clusterItems,
-                        onClusterClick = { cluster ->
-                            val boundsBuilder = LatLngBounds.builder()
+                    GoogleMap(
+                        modifier = Modifier.fillMaxSize(),
+                        cameraPositionState = cameraPositionState,
+                        properties = mapProperties,
+                        uiSettings = mapUiSettings
+                    ) {
+                        Clustering(
+                            items = clusterItems,
+                            onClusterClick = { cluster ->
+                                val boundsBuilder = LatLngBounds.builder()
 
-                            cluster.items.forEach { item ->
-                                boundsBuilder.include(item.position)
-                            }
+                                cluster.items.forEach { item ->
+                                    boundsBuilder.include(item.position)
+                                }
 
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    update = CameraUpdateFactory.newLatLngBounds(
-                                        boundsBuilder.build(),
-                                        MAP_CLUSTER_ZOOM_PADDING
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(
+                                        update = CameraUpdateFactory.newLatLngBounds(
+                                            boundsBuilder.build(),
+                                            MAP_CLUSTER_ZOOM_PADDING
+                                        )
                                     )
-                                )
-                            }
+                                }
 
-                            true
-                        },
-                        onClusterItemClick = { item ->
-                            onRestaurantClick(item.restaurant)
-                            true
-                        },
-                        clusterItemContent = { item ->
-                            RestaurantMarker(
-                                category = item.restaurant.category
-                            )
-                        },
-                        clusterContent = { cluster ->
-                            Box(
-                                modifier = Modifier
-                                    .size(UiConstants.MapClusterSize)
-                                    .background(
-                                        color = MapIconBlue,
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = cluster.size.toString(),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.bodyMedium
+                                true
+                            },
+                            onClusterItemClick = { item ->
+                                onRestaurantClick(item.restaurant)
+                                true
+                            },
+                            clusterItemContent = { item ->
+                                RestaurantMarker(
+                                    category = item.restaurant.category
                                 )
+                            },
+                            clusterContent = { cluster ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(UiConstants.MapClusterSize)
+                                        .background(
+                                            color = MapIconBlue,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = cluster.size.toString(),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+
+                    FloatingActionButton(
+                        onClick = onChatBotClick,
+                        containerColor = MapIconBlue,
+                        contentColor = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(UiConstants.ScreenPadding)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SmartToy,
+                            contentDescription = stringResource(R.string.chatbot_title)
+                        )
+                    }
                 }
             }
         }

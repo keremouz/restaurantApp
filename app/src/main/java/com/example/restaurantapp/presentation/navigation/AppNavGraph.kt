@@ -7,10 +7,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
-import com.example.restaurantapp.presentation.reviews.MyReviewsScreen
 import com.example.restaurantapp.presentation.auth.LoginScreen
 import com.example.restaurantapp.presentation.auth.RegisterScreen
+import com.example.restaurantapp.presentation.chatbot.ChatBotScreen
 import com.example.restaurantapp.presentation.restaurant.RestaurantDetailScreen
+import com.example.restaurantapp.presentation.reviews.MyReviewsScreen
 
 @Composable
 fun AppNavGraph(
@@ -31,7 +32,6 @@ fun AppNavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-
         composable(Routes.MAIN) {
             MainBottomBarScreen(
                 isConnected = isConnected,
@@ -57,6 +57,10 @@ fun AppNavGraph(
 
                 onNavigateToMyReviews = {
                     navController.navigate(Routes.MY_REVIEWS)
+                },
+
+                onNavigateToChatBot = {
+                    navController.navigate(Routes.CHATBOT)
                 }
             )
         }
@@ -105,7 +109,9 @@ fun AppNavGraph(
             restaurant?.let {
                 RestaurantDetailScreen(
                     restaurant = it,
-                    onBackClick = { navController.popBackStack() },
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
                     onRequireLogin = {
                         navController.navigate(Routes.LOGIN)
                     }
@@ -115,7 +121,17 @@ fun AppNavGraph(
 
         composable(Routes.MY_REVIEWS) {
             MyReviewsScreen(
-                onBackClick = { navController.popBackStack() }
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Routes.CHATBOT) {
+            ChatBotScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
     }

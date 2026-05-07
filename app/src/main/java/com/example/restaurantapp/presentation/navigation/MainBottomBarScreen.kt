@@ -43,7 +43,8 @@ fun MainBottomBarScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onRestaurantClick: (Restaurant) -> Unit,
-    onNavigateToMyReviews: () -> Unit
+    onNavigateToMyReviews: () -> Unit,
+    onNavigateToChatBot: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
     val context = LocalContext.current
@@ -140,11 +141,12 @@ fun MainBottomBarScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.MAP) {
-                MapScreen(
-                    isConnected = isConnected,
-                    onRestaurantClick = onRestaurantClick
-                )
-            }
+            MapScreen(
+                isConnected = isConnected,
+                onRestaurantClick = onRestaurantClick,
+                onChatBotClick = onNavigateToChatBot
+            )
+        }
 
             composable(Routes.FAVORITES) {
                 FavoritesScreen(

@@ -198,4 +198,5 @@
     <string name="loading_favorites">Favoriler yükleniyor...</string>
     <string name="loading_restaurant_detail">Restoran bilgileri yükleniyor...</string>
     <string name="favorite_removed">Favorilerden çıkarıldı</string>
+    <string name="chatbot_title">Yapay Zeka Asistanı</string>
 </resources>

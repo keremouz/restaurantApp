@@ -6,7 +6,7 @@ object Routes {
     const val MAP = "map"
     const val FAVORITES = "favorites"
     const val ACCOUNT = "account"
-
+    const val CHATBOT = "chatbot"
     const val LOGIN = "login"
     const val REGISTER = "register"
 
