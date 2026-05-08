@@ -108,6 +108,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("com.airbnb.android:lottie-compose:6.7.1")
+    implementation("com.google.firebase:firebase-ai")
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-ai")
 
     implementation("androidx.navigation:navigation-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")

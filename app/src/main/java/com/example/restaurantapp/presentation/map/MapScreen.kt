@@ -1,5 +1,11 @@
 package com.example.restaurantapp.presentation.map
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,11 +37,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,15 +69,15 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.FloatingActionButton
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
 private val MapSubtitleColor = Color(0xFF6E8BFF)
 private val MapIconBg = Color(0xFFDCE6FF)
 private val MapIconBlue = Color(0xFF2F5BFF)
+private val ChatHintBorder = Color(0xFFDCE6FF)
 
 private val MapCategories = listOf(
     MapCategory(MAP_CATEGORY_ALL, "Tümü", Color(0xFF2F5BFF)),
@@ -89,11 +101,11 @@ fun MapScreen(
     isConnected: Boolean,
     onRestaurantClick: (Restaurant) -> Unit,
     onChatBotClick: () -> Unit
-){
+) {
     val repository = remember {
         RestaurantRepositoryImpl(
             placesApiService = RetrofitProvider.placesApiService,
-            apiKey = BuildConfig.PLACES_API_KEY,
+            apiKey = BuildConfig.PLACES_API_KEY
         )
     }
 
@@ -103,8 +115,25 @@ fun MapScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    var showChatHint by rememberSaveable { mutableStateOf(false) }
+    var stopChatHintLoop by rememberSaveable { mutableStateOf(false) }
+
     LaunchedEffect(isConnected) {
         viewModel.updateConnectionState(isConnected)
+    }
+
+    LaunchedEffect(isConnected, stopChatHintLoop) {
+        if (!isConnected || stopChatHintLoop) return@LaunchedEffect
+
+        delay(1500)
+
+        while (!stopChatHintLoop) {
+            showChatHint = true
+            delay(3500)
+
+            showChatHint = false
+            delay(12000)
+        }
     }
 
     val clusterItems = remember(uiState.filteredRestaurants) {
@@ -271,22 +300,93 @@ fun MapScreen(
                         )
                     }
 
+                    AnimatedVisibility(
+                        visible = showChatHint,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut(),
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(
+                                start = UiConstants.ScreenPadding,
+                                bottom = UiConstants.ScreenPadding +
+                                        UiConstants.ChatBotFabSize +
+                                        UiConstants.MediumSpacing
+                            )
+                    ) {
+                        ChatBotHintBubble(
+                            text = stringResource(R.string.chatbot_hint_message),
+                            onClick = {
+                                showChatHint = false
+                                stopChatHintLoop = true
+                                onChatBotClick()
+                            }
+                        )
+                    }
+
                     FloatingActionButton(
-                        onClick = onChatBotClick,
-                        containerColor = MapIconBlue,
-                        contentColor = Color.White,
+                        onClick = {
+                            showChatHint = false
+                            stopChatHintLoop = true
+                            onChatBotClick()
+                        },
+                        containerColor = Color.White,
+                        contentColor = MapIconBlue,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .padding(UiConstants.ScreenPadding)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.SmartToy,
-                            contentDescription = stringResource(R.string.chatbot_title)
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_ai_location),
+                            contentDescription = stringResource(R.string.chatbot_title),
+                            modifier = Modifier.size(UiConstants.ChatBotFabIconSize),
+                            contentScale = ContentScale.Fit
                         )
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ChatBotHintBubble(
+    text: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.Start
+    ) {
+        Surface(
+            shape = RoundedCornerShape(UiConstants.CardRadius),
+            color = Color.White,
+            shadowElevation = UiConstants.CardElevation,
+            border = BorderStroke(
+                width = UiConstants.ReviewCardBorderWidth,
+                color = ChatHintBorder
+            ),
+            modifier = Modifier.clickable(onClick = onClick)
+        ) {
+            Text(
+                text = text,
+                color = MapTitleColor,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(
+                    horizontal = UiConstants.ContentSpacing,
+                    vertical = UiConstants.MediumSpacing
+                )
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(start = UiConstants.LargeSpacing)
+                .size(UiConstants.ChatBotHintArrowSize)
+                .graphicsLayer {
+                    rotationZ = 45f
+                }
+                .background(Color.White)
+        )
     }
 }
 

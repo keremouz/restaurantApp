@@ -198,5 +198,12 @@
     <string name="loading_favorites">Favoriler yükleniyor...</string>
     <string name="loading_restaurant_detail">Restoran bilgileri yükleniyor...</string>
     <string name="favorite_removed">Favorilerden çıkarıldı</string>
-    <string name="chatbot_title">Yapay Zeka Asistanı</string>
+    <string name="chatbot_title">Resto</string>
+    <string name="chatbot_welcome_message">Merhaba, ben Resto. Sana uygulamadaki restoran yorumları, genel puanlar ve kriterlere göre öneriler sunabilirim.</string>
+    <string name="chatbot_input_hint">Restoran önerisi iste...</string>
+    <string name="chatbot_send">Gönder</string>
+    <string name="chatbot_mock_response">Şimdilik öneri sistemini hazırlıyorum. Yakında yorumlar, favoriler ve genel puanlara göre sana restoran önerebileceğim.</string>
+    <string name="chatbot_typing">Asistan cevap yazıyor...</string>
+    <string name="chatbot_error">Cevap alınamadı. Lütfen tekrar deneyin.</string>
+    <string name="chatbot_hint_message">Ne yemek istiyorsun?</string>
 </resources>

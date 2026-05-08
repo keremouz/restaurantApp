@@ -127,4 +127,8 @@ object UiConstants {
     val ReviewDeleteIconSize = 18.dp
 
     val LottieLoadingSize = 190.dp
+
+    val ChatBotFabIconSize = 70.dp
+    val ChatBotFabSize = 56.dp
+    val ChatBotHintArrowSize = 8.dp
 }
