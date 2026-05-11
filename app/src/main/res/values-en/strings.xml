@@ -206,4 +206,5 @@
     <string name="chatbot_typing">Assistant is typing...</string>
     <string name="chatbot_error">Could not get a response. Please try again.</string>
     <string name="chatbot_hint_message">What would you like to eat?</string>
+    <string name="my_reviews_empty_description">You have not reviewed any restaurants yet. You can add a review from the map page.</string>
 </resources>

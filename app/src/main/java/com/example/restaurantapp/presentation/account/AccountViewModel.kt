@@ -5,6 +5,7 @@ import com.example.restaurantapp.R
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +32,10 @@ class AccountViewModel(
         R.drawable.avatar_crown
     )
 
+    private var userProfileListener: ListenerRegistration? = null
+    private var reviewCountListener: ListenerRegistration? = null
+    private var favoriteCountListener: ListenerRegistration? = null
+
     private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
         _uiState.update { currentState ->
             currentState.copy(
@@ -38,12 +43,12 @@ class AccountViewModel(
             )
         }
 
-        loadAccountData()
+        startAccountListeners()
     }
 
     init {
         firebaseAuth.addAuthStateListener(authStateListener)
-        loadAccountData()
+        startAccountListeners()
     }
 
     fun updateConnectionState(isConnected: Boolean) {
@@ -52,8 +57,9 @@ class AccountViewModel(
         }
 
         if (isConnected) {
-            loadAccountData()
+            startAccountListeners()
         } else {
+            clearAccountListeners()
             resetAccountData()
         }
     }
@@ -122,10 +128,10 @@ class AccountViewModel(
         authManager.signOut()
     }
 
-    private fun loadAccountData() {
-        val state = _uiState.value
+    private fun startAccountListeners() {
+        clearAccountListeners()
 
-        if (!state.isConnected) {
+        if (!_uiState.value.isConnected) {
             resetAccountData()
             return
         }
@@ -137,39 +143,52 @@ class AccountViewModel(
             return
         }
 
-        firestore.collection("users")
+        userProfileListener = firestore.collection("users")
             .document(uid)
-            .get()
-            .addOnSuccessListener { document ->
+            .addSnapshotListener { document, error ->
+                if (error != null) return@addSnapshotListener
+
                 _uiState.update { currentState ->
                     currentState.copy(
-                        fullName = document.getString("fullName").orEmpty()
+                        fullName = document?.getString("fullName").orEmpty()
                     )
                 }
             }
 
-        firestore.collection("comments")
+        reviewCountListener = firestore.collection("comments")
             .whereEqualTo("userId", uid)
-            .get()
-            .addOnSuccessListener { documents ->
+            .addSnapshotListener { documents, error ->
+                if (error != null) return@addSnapshotListener
+
                 _uiState.update { currentState ->
                     currentState.copy(
-                        reviewCount = documents.size()
+                        reviewCount = documents?.size() ?: 0
                     )
                 }
             }
 
-        firestore.collection("users")
+        favoriteCountListener = firestore.collection("users")
             .document(uid)
             .collection("favorites")
-            .get()
-            .addOnSuccessListener { documents ->
+            .addSnapshotListener { documents, error ->
+                if (error != null) return@addSnapshotListener
+
                 _uiState.update { currentState ->
                     currentState.copy(
-                        favoriteCount = documents.size()
+                        favoriteCount = documents?.size() ?: 0
                     )
                 }
             }
+    }
+
+    private fun clearAccountListeners() {
+        userProfileListener?.remove()
+        reviewCountListener?.remove()
+        favoriteCountListener?.remove()
+
+        userProfileListener = null
+        reviewCountListener = null
+        favoriteCountListener = null
     }
 
     private fun resetAccountData() {
@@ -183,6 +202,7 @@ class AccountViewModel(
     }
 
     override fun onCleared() {
+        clearAccountListeners()
         firebaseAuth.removeAuthStateListener(authStateListener)
         super.onCleared()
     }

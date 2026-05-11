@@ -206,4 +206,5 @@
     <string name="chatbot_typing">Asistan cevap yazıyor...</string>
     <string name="chatbot_error">Cevap alınamadı. Lütfen tekrar deneyin.</string>
     <string name="chatbot_hint_message">Ne yemek istiyorsun?</string>
+    <string name="my_reviews_empty_description">Henüz bir restoran değerlendirmesi yapmadın. Harita sayfasından yorum ekleyebilirsin.</string>
 </resources>

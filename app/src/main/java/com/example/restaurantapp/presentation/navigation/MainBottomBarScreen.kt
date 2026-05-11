@@ -6,27 +6,42 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.account.AccountScreen
+import com.example.restaurantapp.presentation.account.components.DeleteAccountSheet
 import com.example.restaurantapp.presentation.favorites.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
 import kotlinx.coroutines.launch
@@ -59,24 +74,6 @@ fun MainBottomBarScreen(
         BottomNavItem.Favorites,
         BottomNavItem.Account
     )
-    LaunchedEffect(Unit) {
-        if (showDeleteSheet) {
-            authManager.deleteAccount(
-                onSuccess = {
-                    Toast.makeText(context, "Hesap silindi", Toast.LENGTH_SHORT).show()
-
-                    onNavigateToLogin()
-                },
-                onError = { error ->
-                    if (error == "REAUTH_REQUIRED") {
-                        onNavigateToLogin()
-                    } else {
-                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            )
-        }
-    }
 
     Scaffold(
         bottomBar = {
@@ -107,7 +104,7 @@ fun MainBottomBarScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = UiConstants.BottomBarInnerHorizontalPadding),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         items.forEach { item ->
@@ -141,12 +138,12 @@ fun MainBottomBarScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.MAP) {
-            MapScreen(
-                isConnected = isConnected,
-                onRestaurantClick = onRestaurantClick,
-                onChatBotClick = onNavigateToChatBot
-            )
-        }
+                MapScreen(
+                    isConnected = isConnected,
+                    onRestaurantClick = onRestaurantClick,
+                    onChatBotClick = onNavigateToChatBot
+                )
+            }
 
             composable(Routes.FAVORITES) {
                 FavoritesScreen(
@@ -161,8 +158,6 @@ fun MainBottomBarScreen(
                     onNavigateToLogin = onNavigateToLogin,
                     onNavigateToRegister = onNavigateToRegister,
                     onNavigateToMyReviews = onNavigateToMyReviews,
-
-
                     onRateAppClick = {
                         try {
                             val intent = Intent(
@@ -179,12 +174,9 @@ fun MainBottomBarScreen(
                             )
                         }
                     },
-
                     onLanguageClick = {
                         // sonra yapacağız
                     },
-
-
                     onDeleteAccountClick = {
                         showDeleteSheet = true
                     }
@@ -193,77 +185,47 @@ fun MainBottomBarScreen(
         }
     }
 
-
     if (showDeleteSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showDeleteSheet = false },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(UiConstants.ScreenPadding),
-                verticalArrangement = Arrangement.spacedBy(UiConstants.ContentSpacing)
-            ) {
-
-                Text(
-                    text = stringResource(R.string.delete_account),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    text = stringResource(R.string.delete_account_subtitle),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                val message = stringResource(R.string.account_deleted)
-
-                Button(
-                    onClick = {
-                        scope.launch { sheetState.hide() }
-                        showDeleteSheet = false
-
-                        authManager.deleteAccount(
-                            onSuccess = {
-                                Toast.makeText(
-                                    context,
-                                    message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                onNavigateToLogin()
-                            },
-                            onError = { error ->
-                                if (error == "REAUTH_REQUIRED") {
-                                    onNavigateToLogin() // 🔥 login'e gönder
-                                } else {
-                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        )
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF64B5F6)
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(stringResource(R.string.delete_account))
+        DeleteAccountSheet(
+            sheetState = sheetState,
+            onConfirmClick = {
+                scope.launch {
+                    sheetState.hide()
                 }
 
-                OutlinedButton(
-                    onClick = {
-                        scope.launch { sheetState.hide() }
-                        showDeleteSheet = false
+                showDeleteSheet = false
+
+                authManager.deleteAccount(
+                    onSuccess = {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.account_deleted),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        onNavigateToLogin()
                     },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.cancel))
+                    onError = { error ->
+                        if (error == "REAUTH_REQUIRED") {
+                            onNavigateToLogin()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                error,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
+            },
+            onDismissClick = {
+                scope.launch {
+                    sheetState.hide()
                 }
+
+                showDeleteSheet = false
             }
-        }
+        )
     }
 }
 

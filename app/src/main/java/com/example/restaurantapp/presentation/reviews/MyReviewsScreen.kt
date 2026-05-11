@@ -61,8 +61,14 @@ import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.firebase.UserComment
 import com.example.restaurantapp.presentation.components.LottieLoadingContent
 import java.util.Locale
+import androidx.compose.foundation.Image
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 
-private val ReviewBg = Color(0xFFF7F8FC)
+
+private val ReviewBg = Color.White
 private val ReviewCardBg = Color(0xFFFFFFFF)
 private val ReviewCardBorder = Color(0xFFE1E6F5)
 private val ReviewTitleColor = Color(0xFF123A9F)
@@ -107,7 +113,10 @@ fun MyReviewsScreen(
                             tint = ReviewTitleColor
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White
+                )
             )
         }
     ) { paddingValues ->
@@ -143,19 +152,9 @@ fun MyReviewsScreen(
             }
 
             uiState.reviews.isEmpty() -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(UiConstants.ScreenPadding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.my_reviews_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = ReviewMutedColor
-                    )
-                }
+                EmptyReviewsContent(
+                    modifier = Modifier.padding(paddingValues)
+                )
             }
 
             else -> {
@@ -580,4 +579,44 @@ private fun RatingRow(
 
 private fun scoreText(rating: Double): String {
     return String.format(Locale.getDefault(), "%.1f/5", rating)
+}
+@Composable
+private fun EmptyReviewsContent(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(horizontal = UiConstants.ScreenPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.img_empty_favorites),
+            contentDescription = null,
+            modifier = Modifier.size(UiConstants.EmptyFavoritesImageSize),
+            contentScale = ContentScale.Fit
+        )
+
+        Spacer(modifier = Modifier.size(UiConstants.ContentSpacing))
+
+        Text(
+            text = stringResource(R.string.my_reviews_empty),
+            style = MaterialTheme.typography.titleMedium,
+            color = ReviewTitleColor,
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.size(UiConstants.SmallSpacing))
+
+        Text(
+            text = stringResource(R.string.my_reviews_empty_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = ReviewMutedColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(0.9f)
+        )
+    }
 }
