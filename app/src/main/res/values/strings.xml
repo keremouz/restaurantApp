@@ -207,4 +207,5 @@
     <string name="chatbot_error">Cevap alınamadı. Lütfen tekrar deneyin.</string>
     <string name="chatbot_hint_message">Ne yemek istiyorsun?</string>
     <string name="my_reviews_empty_description">Henüz bir restoran değerlendirmesi yapmadın. Harita sayfasından yorum ekleyebilirsin.</string>
+    <string name="select_profile_photo">Profil Fotoğrafı Seç</string>
 </resources>

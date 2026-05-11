@@ -86,7 +86,6 @@ fun AccountScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToMyReviews: () -> Unit,
     onRateAppClick: () -> Unit,
-    onLanguageClick: () -> Unit,
     onDeleteAccountClick: () -> Unit
 ) {
     val viewModel: AccountViewModel = viewModel(
@@ -147,7 +146,6 @@ fun AccountScreen(
                     onNavigateToMyReviews = onNavigateToMyReviews,
                     onRateAppClick = onRateAppClick,
                     onLanguageClick = {
-                        onLanguageClick()
                         viewModel.showLanguageSheet()
                     },
                     onDeleteAccountClick = onDeleteAccountClick,
@@ -175,7 +173,7 @@ fun AccountScreen(
                     .padding(UiConstants.BottomSheetPadding)
             ) {
                 Text(
-                    text = "Profil Fotoğrafı Seç",
+                    text = stringResource(R.string.select_profile_photo),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )

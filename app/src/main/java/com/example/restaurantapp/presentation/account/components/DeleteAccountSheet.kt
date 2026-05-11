@@ -25,6 +25,7 @@ import com.example.restaurantapp.core.util.UiConstants
 @Composable
 fun DeleteAccountSheet(
     sheetState: SheetState,
+    isLoading: Boolean,
     onConfirmClick: () -> Unit,
     onDismissClick: () -> Unit
 ) {
@@ -50,6 +51,7 @@ fun DeleteAccountSheet(
 
             Button(
                 onClick = onConfirmClick,
+                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF64B5F6)
                 ),
@@ -65,6 +67,7 @@ fun DeleteAccountSheet(
 
             OutlinedButton(
                 onClick = onDismissClick,
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(UiConstants.ButtonRadius)
             ) {

@@ -23,17 +23,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -42,13 +41,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
-import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.account.AccountScreen
 import com.example.restaurantapp.presentation.account.components.DeleteAccountSheet
 import com.example.restaurantapp.presentation.favorites.FavoritesScreen
 import com.example.restaurantapp.presentation.map.MapScreen
-import kotlinx.coroutines.launch
 
 private val BottomBarBlue = Color(0xFF2F5BFF)
 private val BottomBarSelectedIcon = Color.White
@@ -67,12 +64,46 @@ fun MainBottomBarScreen(
 ) {
     val bottomNavController = rememberNavController()
     val context = LocalContext.current
-    val authManager = remember { AuthManager() }
-    val accountDeletedMessage = stringResource(R.string.account_deleted)
+
+    val viewModel: MainBottomBarViewModel = viewModel(
+        factory = MainBottomBarViewModelFactory()
+    )
+    val uiState by viewModel.uiState.collectAsState()
 
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showDeleteSheet by remember { mutableStateOf(false) }
+    val accountDeletedMessage = stringResource(R.string.account_deleted)
+
+    LaunchedEffect(uiState.deleteAccountEvent) {
+        when (val event = uiState.deleteAccountEvent) {
+            DeleteAccountEvent.Success -> {
+                Toast.makeText(
+                    context,
+                    accountDeletedMessage,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                onNavigateToLogin()
+                viewModel.clearDeleteAccountEvent()
+            }
+
+            DeleteAccountEvent.ReauthRequired -> {
+                onNavigateToLogin()
+                viewModel.clearDeleteAccountEvent()
+            }
+
+            is DeleteAccountEvent.Error -> {
+                Toast.makeText(
+                    context,
+                    event.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                viewModel.clearDeleteAccountEvent()
+            }
+
+            null -> Unit
+        }
+    }
 
     val items = listOf(
         BottomNavItem.Home,
@@ -198,56 +229,23 @@ fun MainBottomBarScreen(
                             )
                         }
                     },
-                    onLanguageClick = {
-                        // sonra yapacağız
-                    },
                     onDeleteAccountClick = {
-                        showDeleteSheet = true
+                        viewModel.showDeleteAccountSheet()
                     }
                 )
             }
         }
     }
 
-    if (showDeleteSheet) {
+    if (uiState.showDeleteSheet) {
         DeleteAccountSheet(
             sheetState = sheetState,
+            isLoading = uiState.isDeletingAccount,
             onConfirmClick = {
-                scope.launch {
-                    sheetState.hide()
-                }
-
-                showDeleteSheet = false
-
-                authManager.deleteAccount(
-                    onSuccess = {
-                        Toast.makeText(
-                            context,
-                            accountDeletedMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        onNavigateToLogin()
-                    },
-                    onError = { error ->
-                        if (error == "REAUTH_REQUIRED") {
-                            onNavigateToLogin()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                error,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                )
+                viewModel.deleteAccount()
             },
             onDismissClick = {
-                scope.launch {
-                    sheetState.hide()
-                }
-
-                showDeleteSheet = false
+                viewModel.hideDeleteAccountSheet()
             }
         )
     }
