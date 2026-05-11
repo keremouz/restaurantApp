@@ -4,6 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -64,6 +68,7 @@ fun MainBottomBarScreen(
     val bottomNavController = rememberNavController()
     val context = LocalContext.current
     val authManager = remember { AuthManager() }
+    val accountDeletedMessage = stringResource(R.string.account_deleted)
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -131,11 +136,30 @@ fun MainBottomBarScreen(
             }
         }
     ) { innerPadding ->
-
         NavHost(
             navController = bottomNavController,
             startDestination = Routes.MAP,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(durationMillis = 700)
+                )
+            },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(durationMillis = 700)
+                )
+            },
+            popEnterTransition = {
+                fadeIn(
+                    animationSpec = tween(durationMillis = 700)
+                )
+            },
+            popExitTransition = {
+                fadeOut(
+                    animationSpec = tween(durationMillis = 700)
+                )
+            }
         ) {
             composable(Routes.MAP) {
                 MapScreen(
@@ -199,7 +223,7 @@ fun MainBottomBarScreen(
                     onSuccess = {
                         Toast.makeText(
                             context,
-                            context.getString(R.string.account_deleted),
+                            accountDeletedMessage,
                             Toast.LENGTH_SHORT
                         ).show()
 

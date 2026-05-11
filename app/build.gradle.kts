@@ -110,6 +110,7 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.7.1")
     implementation("com.google.firebase:firebase-ai")
     implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+    implementation("androidx.core:core-splashscreen:1.2.0")
 
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")

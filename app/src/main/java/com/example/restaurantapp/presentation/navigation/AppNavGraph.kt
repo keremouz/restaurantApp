@@ -1,5 +1,8 @@
 package com.example.restaurantapp.presentation.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -30,7 +33,27 @@ fun AppNavGraph(
     NavHost(
         navController = navController,
         startDestination = startDestination,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = {
+            fadeIn(
+                animationSpec = tween(durationMillis = 1000)
+            )
+        },
+        exitTransition = {
+            fadeOut(
+                animationSpec = tween(durationMillis = 900)
+            )
+        },
+        popEnterTransition = {
+            fadeIn(
+                animationSpec = tween(durationMillis = 1000)
+            )
+        },
+        popExitTransition = {
+            fadeOut(
+                animationSpec = tween(durationMillis = 900)
+            )
+        }
     ) {
         composable(Routes.MAIN) {
             MainBottomBarScreen(
