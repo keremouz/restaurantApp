@@ -277,18 +277,18 @@ private fun BottomBarItem(
                 )
             }
 
-            Routes.ACCOUNT -> {
+            Routes.FAVORITES -> {
                 Icon(
-                    painter = painterResource(R.drawable.ic_bottom_profile),
+                    painter = painterResource(R.drawable.ic_bottom_favorite),
                     contentDescription = null,
                     tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
                     modifier = Modifier.size(UiConstants.BottomBarIconSize)
                 )
             }
 
-            else -> {
+            Routes.ACCOUNT -> {
                 Icon(
-                    imageVector = item.icon,
+                    painter = painterResource(R.drawable.ic_bottom_profile),
                     contentDescription = null,
                     tint = if (selected) BottomBarSelectedIcon else BottomBarUnselectedIcon,
                     modifier = Modifier.size(UiConstants.BottomBarIconSize)
