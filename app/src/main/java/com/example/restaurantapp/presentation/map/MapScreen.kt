@@ -1,5 +1,9 @@
 package com.example.restaurantapp.presentation.map
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,12 +28,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,18 +55,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.BuildConfig
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.di.RetrofitProvider
+import com.example.restaurantapp.core.location.AppLocationHolder
+import com.example.restaurantapp.core.location.AppRestaurantHolder
+import com.example.restaurantapp.core.location.UserLocation
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.data.repository.RestaurantRepositoryImpl
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.components.ConnectionWarningContent
 import com.example.restaurantapp.presentation.components.LottieLoadingContent
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -71,21 +86,6 @@ import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.compose.ui.platform.LocalContext
-import com.example.restaurantapp.core.location.AppLocationHolder
-import com.example.restaurantapp.core.location.AppRestaurantHolder
-import com.example.restaurantapp.core.location.UserLocation
-import com.google.android.gms.location.LocationServices
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.ui.text.style.TextOverflow
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
@@ -164,9 +164,14 @@ fun MapScreen(
     var showChatHint by rememberSaveable { mutableStateOf(false) }
     var stopChatHintLoop by rememberSaveable { mutableStateOf(false) }
 
+    var selectedRestaurant by remember {
+        mutableStateOf<Restaurant?>(null)
+    }
+
     LaunchedEffect(isConnected) {
         viewModel.updateConnectionState(isConnected)
     }
+
     LaunchedEffect(Unit) {
         if (!hasLocationPermission) {
             locationPermissionLauncher.launch(
@@ -177,6 +182,7 @@ fun MapScreen(
             )
         }
     }
+
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
             fusedLocationClient.lastLocation
@@ -220,6 +226,17 @@ fun MapScreen(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    fun resetMapZoom() {
+        coroutineScope.launch {
+            cameraPositionState.animate(
+                update = CameraUpdateFactory.newLatLngZoom(
+                    istanbul,
+                    11f
+                )
+            )
+        }
+    }
+
 
     val mapProperties = remember(hasLocationPermission) {
         MapProperties(
@@ -238,15 +255,25 @@ fun MapScreen(
             myLocationButtonEnabled = hasLocationPermission
         )
     }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             MapTopBar(
                 selectedCategory = uiState.selectedCategory,
                 searchQuery = uiState.searchQuery,
-                onSearchQueryChanged = viewModel::onSearchQueryChanged,
+                onSearchQueryChanged = { query ->
+                    selectedRestaurant = null
+                    viewModel.onSearchQueryChanged(query)
+
+                    if (query.isBlank()) {
+                        resetMapZoom()
+                    }
+                },
                 onCategorySelected = { category ->
+                    selectedRestaurant = null
                     viewModel.onCategorySelected(category)
+                    resetMapZoom()
                 }
             )
         }
@@ -326,6 +353,8 @@ fun MapScreen(
                         Clustering(
                             items = clusterItems,
                             onClusterClick = { cluster ->
+                                selectedRestaurant = null
+
                                 val boundsBuilder = LatLngBounds.builder()
 
                                 cluster.items.forEach { item ->
@@ -344,7 +373,17 @@ fun MapScreen(
                                 true
                             },
                             onClusterItemClick = { item ->
-                                onRestaurantClick(item.restaurant)
+                                selectedRestaurant = item.restaurant
+
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(
+                                        update = CameraUpdateFactory.newLatLngZoom(
+                                            item.position,
+                                            MAP_SELECTED_RESTAURANT_ZOOM
+                                        )
+                                    )
+                                }
+
                                 true
                             },
                             clusterItemContent = { item ->
@@ -373,8 +412,28 @@ fun MapScreen(
                         )
                     }
 
+                    selectedRestaurant?.let { restaurant ->
+                        SelectedRestaurantCard(
+                            restaurant = restaurant,
+                            onDetailClick = {
+                                onRestaurantClick(restaurant)
+                            },
+                            onCloseClick = {
+                                selectedRestaurant = null
+                                resetMapZoom()
+                            },
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(
+                                    start = UiConstants.ScreenPadding,
+                                    end = UiConstants.ScreenPadding,
+                                    bottom = UiConstants.ScreenPadding
+                                )
+                        )
+                    }
+
                     AnimatedVisibility(
-                        visible = showChatHint,
+                        visible = showChatHint && selectedRestaurant == null,
                         enter = fadeIn() + scaleIn(),
                         exit = fadeOut() + scaleOut(),
                         modifier = Modifier
@@ -396,26 +455,110 @@ fun MapScreen(
                         )
                     }
 
-                    FloatingActionButton(
-                        onClick = {
-                            showChatHint = false
-                            stopChatHintLoop = true
-                            onChatBotClick()
-                        },
-                        containerColor = Color.White,
-                        contentColor = MapIconBlue,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(UiConstants.ScreenPadding)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_ai_location),
-                            contentDescription = stringResource(R.string.chatbot_title),
-                            modifier = Modifier.size(UiConstants.ChatBotFabIconSize),
-                            contentScale = ContentScale.Fit
+                    if (selectedRestaurant == null) {
+                        FloatingActionButton(
+                            onClick = {
+                                showChatHint = false
+                                stopChatHintLoop = true
+                                onChatBotClick()
+                            },
+                            containerColor = Color.White,
+                            contentColor = MapIconBlue,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(UiConstants.ScreenPadding)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_ai_location),
+                                contentDescription = stringResource(R.string.chatbot_title),
+                                modifier = Modifier.size(UiConstants.ChatBotFabIconSize),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectedRestaurantCard(
+    restaurant: Restaurant,
+    onDetailClick: () -> Unit,
+    onCloseClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(UiConstants.CardRadius),
+        color = Color.White,
+        shadowElevation = UiConstants.CardElevation,
+        border = BorderStroke(
+            width = UiConstants.ReviewCardBorderWidth,
+            color = ChatHintBorder
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(UiConstants.ContentSpacing),
+            verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
+                ) {
+                    Text(
+                        text = restaurant.name,
+                        color = MapTitleColor,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = restaurant.address,
+                        color = MapSubtitleColor,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    restaurant.district?.takeIf { it.isNotBlank() }?.let { district ->
+                        Text(
+                            text = district,
+                            color = MapIconBlue,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
+
+                Text(
+                    text = "Kapat",
+                    color = MapIconBlue,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.clickable(onClick = onCloseClick)
+                )
+            }
+
+            Button(
+                onClick = onDetailClick,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MapIconBlue
+                ),
+                shape = RoundedCornerShape(UiConstants.ButtonRadius),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Detaya Git",
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
@@ -557,6 +700,7 @@ private fun MapTopBar(
                     )
                 }
             }
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChanged,
@@ -732,3 +876,4 @@ private data class RestaurantClusterItem(
 }
 
 private const val MAP_CLUSTER_ZOOM_PADDING = 120
+private const val MAP_SELECTED_RESTAURANT_ZOOM = 17f
