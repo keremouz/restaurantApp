@@ -9,6 +9,7 @@ data class MapUiState(
     val restaurants: List<Restaurant> = emptyList(),
     val filteredRestaurants: List<Restaurant> = emptyList(),
     val selectedCategory: String = MAP_CATEGORY_ALL,
+    val searchQuery: String = "",
     val errorMessage: String? = null,
     val isConnected: Boolean = false
 )

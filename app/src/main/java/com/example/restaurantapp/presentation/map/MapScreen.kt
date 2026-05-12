@@ -81,6 +81,11 @@ import com.example.restaurantapp.core.location.AppLocationHolder
 import com.example.restaurantapp.core.location.AppRestaurantHolder
 import com.example.restaurantapp.core.location.UserLocation
 import com.google.android.gms.location.LocationServices
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.text.style.TextOverflow
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
@@ -238,6 +243,8 @@ fun MapScreen(
         topBar = {
             MapTopBar(
                 selectedCategory = uiState.selectedCategory,
+                searchQuery = uiState.searchQuery,
+                onSearchQueryChanged = viewModel::onSearchQueryChanged,
                 onCategorySelected = { category ->
                     viewModel.onCategorySelected(category)
                 }
@@ -494,6 +501,8 @@ private fun MapErrorContent(
 @Composable
 private fun MapTopBar(
     selectedCategory: String,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     onCategorySelected: (String) -> Unit
 ) {
     Surface(
@@ -548,6 +557,53 @@ private fun MapTopBar(
                     )
                 }
             }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChanged,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = UiConstants.ScreenPadding,
+                        end = UiConstants.ScreenPadding,
+                        bottom = UiConstants.SmallSpacing
+                    ),
+                placeholder = {
+                    Text(
+                        text = "Restoran adı ara...",
+                        color = MapSubtitleColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MapIconBlue
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotBlank()) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = MapIconBlue,
+                            modifier = Modifier.clickable {
+                                onSearchQueryChanged("")
+                            }
+                        )
+                    }
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(UiConstants.TextFieldRadius),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MapIconBlue,
+                    unfocusedBorderColor = ChatHintBorder,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    cursorColor = MapIconBlue
+                )
+            )
 
             LazyRow(
                 modifier = Modifier

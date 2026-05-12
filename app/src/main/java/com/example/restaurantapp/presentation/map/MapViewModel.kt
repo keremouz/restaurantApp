@@ -37,7 +37,21 @@ class MapViewModel(
                 selectedCategory = category,
                 filteredRestaurants = filterRestaurants(
                     restaurants = currentState.restaurants,
-                    selectedCategory = category
+                    selectedCategory = category,
+                    searchQuery = currentState.searchQuery
+                )
+            )
+        }
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                searchQuery = query,
+                filteredRestaurants = filterRestaurants(
+                    restaurants = currentState.restaurants,
+                    selectedCategory = currentState.selectedCategory,
+                    searchQuery = query
                 )
             )
         }
@@ -69,6 +83,7 @@ class MapViewModel(
             try {
                 val restaurants = repository.getNearbyRestaurants()
                 val selectedCategory = _uiState.value.selectedCategory
+                val searchQuery = _uiState.value.searchQuery
 
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -76,7 +91,8 @@ class MapViewModel(
                         restaurants = restaurants,
                         filteredRestaurants = filterRestaurants(
                             restaurants = restaurants,
-                            selectedCategory = selectedCategory
+                            selectedCategory = selectedCategory,
+                            searchQuery = searchQuery
                         ),
                         errorMessage = null
                     )
@@ -94,14 +110,19 @@ class MapViewModel(
 
     private fun filterRestaurants(
         restaurants: List<Restaurant>,
-        selectedCategory: String
+        selectedCategory: String,
+        searchQuery: String
     ): List<Restaurant> {
-        return if (selectedCategory == MAP_CATEGORY_ALL) {
-            restaurants
-        } else {
-            restaurants.filter { restaurant ->
-                restaurant.category == selectedCategory
-            }
+        return restaurants.filter { restaurant ->
+            val categoryMatches =
+                selectedCategory == MAP_CATEGORY_ALL ||
+                        restaurant.category == selectedCategory
+
+            val searchMatches =
+                searchQuery.isBlank() ||
+                        restaurant.name.contains(searchQuery, ignoreCase = true)
+
+            categoryMatches && searchMatches
         }
     }
 }
