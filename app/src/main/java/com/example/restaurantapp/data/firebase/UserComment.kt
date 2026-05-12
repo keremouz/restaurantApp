@@ -14,4 +14,6 @@ data class UserComment(
     val ratings: CommentRatings = CommentRatings(),
     val createdAt: Long = System.currentTimeMillis(),
     val district: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

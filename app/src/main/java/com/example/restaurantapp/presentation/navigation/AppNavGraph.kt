@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.restaurantapp.core.location.AppRestaurantHolder
 import com.example.restaurantapp.data.firebase.AuthManager
 import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.presentation.auth.LoginScreen
@@ -152,6 +153,7 @@ fun AppNavGraph(
 
         composable(Routes.CHATBOT) {
             ChatBotScreen(
+                restaurants = AppRestaurantHolder.restaurants,
                 onBackClick = {
                     navController.popBackStack()
                 }

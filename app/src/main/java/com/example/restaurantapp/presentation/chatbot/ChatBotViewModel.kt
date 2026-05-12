@@ -2,6 +2,7 @@ package com.example.restaurantapp.presentation.chatbot
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.restaurantapp.domain.model.Restaurant
 import com.example.restaurantapp.domain.repository.ChatBotRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,7 @@ class ChatBotViewModel(
         }
     }
 
-    fun sendMessage() {
+    fun sendMessage(restaurants: List<Restaurant>) {
         val userMessageText = _uiState.value.inputText.trim()
 
         if (userMessageText.isBlank() || _uiState.value.isLoading) return
@@ -61,7 +62,10 @@ class ChatBotViewModel(
 
         viewModelScope.launch {
             try {
-                val botAnswer = repository.sendMessage(userMessageText)
+                val botAnswer = repository.sendMessage(
+                    message = userMessageText,
+                    restaurants = restaurants
+                )
 
                 val botMessage = ChatMessage(
                     text = botAnswer,
@@ -75,10 +79,16 @@ class ChatBotViewModel(
                     )
                 }
             } catch (exception: Exception) {
+                val errorMessage = ChatMessage(
+                    text = exception.message ?: "Cevap alınamadı.",
+                    isFromUser = false
+                )
+
                 _uiState.update { currentState ->
                     currentState.copy(
                         isLoading = false,
-                        errorMessage = exception.message ?: "Cevap alınamadı"
+                        errorMessage = exception.message ?: "Cevap alınamadı.",
+                        messages = currentState.messages + errorMessage
                     )
                 }
             }

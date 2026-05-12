@@ -46,6 +46,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import com.example.restaurantapp.domain.model.Restaurant
 
 private val ChatBotBlue = Color(0xFF2F5BFF)
 private val ChatBotBg = Color(0xFFF5F8FF)
@@ -58,8 +59,9 @@ private val ChatBotHint = Color(0xFF8A97B8)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatBotScreen(
+    restaurants: List<Restaurant>,
     onBackClick: () -> Unit
-) {
+){
     val viewModel: ChatBotViewModel = viewModel(
         factory = ChatBotViewModelFactory()
     )
@@ -104,7 +106,7 @@ fun ChatBotScreen(
                 isLoading = uiState.isLoading,
                 onInputChanged = viewModel::updateInputText,
                 onSendClick = {
-                    viewModel.sendMessage()
+                    viewModel.sendMessage(restaurants)
                 }
             )
         }
@@ -159,6 +161,10 @@ private fun ChatMessageBubble(
         ChatBotText
     }
 
+    val cleanedText = message.text
+        .replace("**", "")
+        .replace("*", "")
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = horizontalAlignment
@@ -184,7 +190,10 @@ private fun ChatMessageBubble(
             )
         ) {
             Row(
-                modifier = Modifier.padding(UiConstants.ContentSpacing),
+                modifier = Modifier.padding(
+                    horizontal = UiConstants.MediumSpacing,
+                    vertical = UiConstants.SmallSpacing
+                ),
                 horizontalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing),
                 verticalAlignment = Alignment.Top
             ) {
@@ -198,7 +207,7 @@ private fun ChatMessageBubble(
                 }
 
                 Text(
-                    text = message.text,
+                    text = cleanedText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = textColor
                 )

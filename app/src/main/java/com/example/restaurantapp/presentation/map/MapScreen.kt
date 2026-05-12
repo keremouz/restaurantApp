@@ -71,6 +71,16 @@ import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import com.example.restaurantapp.core.location.AppLocationHolder
+import com.example.restaurantapp.core.location.AppRestaurantHolder
+import com.example.restaurantapp.core.location.UserLocation
+import com.google.android.gms.location.LocationServices
 
 private val MapTopBarBg = Color(0xFFF5F8FF)
 private val MapTitleColor = Color(0xFF2F5BFF)
@@ -115,11 +125,67 @@ fun MapScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(uiState.restaurants) {
+        AppRestaurantHolder.restaurants = uiState.restaurants
+    }
+
+    val context = LocalContext.current
+
+    var hasLocationPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasLocationPermission =
+            permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+    }
+
     var showChatHint by rememberSaveable { mutableStateOf(false) }
     var stopChatHintLoop by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(isConnected) {
         viewModel.updateConnectionState(isConnected)
+    }
+    LaunchedEffect(Unit) {
+        if (!hasLocationPermission) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+    LaunchedEffect(hasLocationPermission) {
+        if (hasLocationPermission) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    location?.let {
+                        val userLocation = UserLocation(
+                            latitude = it.latitude,
+                            longitude = it.longitude
+                        )
+
+                        AppLocationHolder.userLocation = userLocation
+                    }
+                }
+        }
     }
 
     LaunchedEffect(isConnected, stopChatHintLoop) {
@@ -150,23 +216,23 @@ fun MapScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    val mapProperties = remember {
+    val mapProperties = remember(hasLocationPermission) {
         MapProperties(
             isBuildingEnabled = true,
             isIndoorEnabled = true,
-            isTrafficEnabled = false
+            isTrafficEnabled = false,
+            isMyLocationEnabled = hasLocationPermission
         )
     }
 
-    val mapUiSettings = remember {
+    val mapUiSettings = remember(hasLocationPermission) {
         MapUiSettings(
             compassEnabled = true,
             zoomControlsEnabled = false,
             mapToolbarEnabled = false,
-            myLocationButtonEnabled = false
+            myLocationButtonEnabled = hasLocationPermission
         )
     }
-
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {

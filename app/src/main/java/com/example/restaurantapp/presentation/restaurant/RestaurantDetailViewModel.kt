@@ -154,8 +154,10 @@ class RestaurantDetailViewModel(
         commentsManager.addComment(
             restaurantId = restaurant.placeId,
             restaurantName = restaurant.name,
-            district = extractDistrict(restaurant.address),
-            comment = state.commentText.trim(),
+            district = restaurant.district.orEmpty(),
+            latitude = restaurant.latitude,
+            longitude = restaurant.longitude,
+            comment = state.commentText,
             ratings = ratings,
             onSuccess = {
                 _uiState.update { currentState ->
