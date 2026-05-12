@@ -29,6 +29,7 @@ fun DeleteAccountSheet(
     onConfirmClick: () -> Unit,
     onDismissClick: () -> Unit
 ) {
+
     ModalBottomSheet(
         onDismissRequest = onDismissClick,
         sheetState = sheetState

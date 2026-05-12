@@ -9,7 +9,14 @@ data class MyReviewsUiState(
     val selectedSort: ReviewSortType = ReviewSortType.NEWEST,
     val filterExpanded: Boolean = false,
     val showDeleteSheet: Boolean = false,
-    val selectedReview: UserComment? = null
+    val showEditSheet: Boolean = false,
+    val selectedReview: UserComment? = null,
+    val editCommentText: String = "",
+    val editTasteRating: Int = 0,
+    val editServiceRating: Int = 0,
+    val editPricePerformanceRating: Int = 0,
+    val editAtmosphereRating: Int = 0,
+    val editLocationRating: Int = 0
 )
 
 enum class ReviewSortType(val label: String) {

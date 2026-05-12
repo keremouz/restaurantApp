@@ -538,7 +538,7 @@ private fun SelectedRestaurantCard(
                 }
 
                 Text(
-                    text = "Kapat",
+                    text = stringResource(R.string.map_selected_restaurant_close),
                     color = MapIconBlue,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -555,7 +555,7 @@ private fun SelectedRestaurantCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Detaya Git",
+                    text = stringResource(R.string.map_selected_restaurant_detail),
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -713,7 +713,7 @@ private fun MapTopBar(
                     ),
                 placeholder = {
                     Text(
-                        text = "Restoran adı ara...",
+                        text = stringResource(R.string.map_search_hint),
                         color = MapSubtitleColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import com.example.restaurantapp.data.firebase.CommentRatings
 
 class MyReviewsViewModel(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
@@ -94,6 +95,139 @@ class MyReviewsViewModel(
                 showDeleteSheet = true
             )
         }
+    }
+    fun onEditClick(review: UserComment) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedReview = review,
+                showEditSheet = true,
+                editCommentText = review.comment,
+                editTasteRating = review.ratings.taste,
+                editServiceRating = review.ratings.service,
+                editPricePerformanceRating = review.ratings.pricePerformance,
+                editAtmosphereRating = review.ratings.atmosphere,
+                editLocationRating = review.ratings.location,
+                errorMessage = null
+            )
+        }
+    }
+
+    fun dismissEditSheet() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedReview = null,
+                showEditSheet = false,
+                editCommentText = "",
+                editTasteRating = 0,
+                editServiceRating = 0,
+                editPricePerformanceRating = 0,
+                editAtmosphereRating = 0,
+                editLocationRating = 0
+            )
+        }
+    }
+
+    fun updateEditCommentText(value: String) {
+        _uiState.update { currentState ->
+            currentState.copy(editCommentText = value)
+        }
+    }
+
+    fun updateEditTasteRating(value: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(editTasteRating = value)
+        }
+    }
+
+    fun updateEditServiceRating(value: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(editServiceRating = value)
+        }
+    }
+
+    fun updateEditPricePerformanceRating(value: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(editPricePerformanceRating = value)
+        }
+    }
+
+    fun updateEditAtmosphereRating(value: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(editAtmosphereRating = value)
+        }
+    }
+
+    fun updateEditLocationRating(value: Int) {
+        _uiState.update { currentState ->
+            currentState.copy(editLocationRating = value)
+        }
+    }
+
+    fun updateSelectedReview() {
+        val reviewToUpdate = _uiState.value.selectedReview ?: return
+        val state = _uiState.value
+
+        if (
+            state.editCommentText.isBlank() ||
+            state.editTasteRating == 0 ||
+            state.editServiceRating == 0 ||
+            state.editPricePerformanceRating == 0 ||
+            state.editAtmosphereRating == 0 ||
+            state.editLocationRating == 0
+        ) {
+            _uiState.update { currentState ->
+                currentState.copy(errorMessage = "Lütfen tüm alanları doldurun")
+            }
+            return
+        }
+
+        val updatedRatings = CommentRatings(
+            taste = state.editTasteRating,
+            service = state.editServiceRating,
+            pricePerformance = state.editPricePerformanceRating,
+            atmosphere = state.editAtmosphereRating,
+            location = state.editLocationRating
+        )
+
+        commentsManager.updateComment(
+            commentId = reviewToUpdate.commentId,
+            comment = state.editCommentText,
+            ratings = updatedRatings,
+            onSuccess = {
+                val updatedReview = reviewToUpdate.copy(
+                    comment = state.editCommentText,
+                    ratings = updatedRatings,
+                    generalRating = updatedRatings.average(),
+                    createdAt = System.currentTimeMillis()
+                )
+
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        reviews = currentState.reviews.map { review ->
+                            if (review.commentId == updatedReview.commentId) {
+                                updatedReview
+                            } else {
+                                review
+                            }
+                        },
+                        selectedReview = null,
+                        showEditSheet = false,
+                        editCommentText = "",
+                        editTasteRating = 0,
+                        editServiceRating = 0,
+                        editPricePerformanceRating = 0,
+                        editAtmosphereRating = 0,
+                        editLocationRating = 0,
+                        errorMessage = null
+                    )
+                }
+            },
+            onError = { error ->
+                _uiState.update { currentState ->
+                    currentState.copy(errorMessage = error)
+                }
+            }
+        )
     }
 
     fun dismissDeleteSheet() {

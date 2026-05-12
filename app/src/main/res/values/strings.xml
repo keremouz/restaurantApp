@@ -208,4 +208,7 @@
     <string name="chatbot_hint_message">Ne yemek istiyorsun?</string>
     <string name="my_reviews_empty_description">Henüz bir restoran değerlendirmesi yapmadın. Harita sayfasından yorum ekleyebilirsin.</string>
     <string name="select_profile_photo">Profil Fotoğrafı Seç</string>
+    <string name="map_search_hint">Restoran adı ara...</string>
+    <string name="map_selected_restaurant_close">Kapat</string>
+    <string name="map_selected_restaurant_detail">Detaya Git</string>
 </resources>

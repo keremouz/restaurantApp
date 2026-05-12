@@ -127,4 +127,26 @@ class CommentsManager(
                 onError(e.message ?: "Genel puan alınamadı")
             }
     }
+    fun updateComment(
+        commentId: String,
+        comment: String,
+        ratings: CommentRatings,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val updates = mapOf(
+            "comment" to comment,
+            "ratings" to ratings,
+            "generalRating" to ratings.average(),
+            "createdAt" to System.currentTimeMillis()
+        )
+
+        firestore.collection("comments")
+            .document(commentId)
+            .update(updates)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Yorum güncellenemedi")
+            }
+    }
 }

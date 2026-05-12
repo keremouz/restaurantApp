@@ -135,5 +135,7 @@ object UiConstants {
     val ChatBotMessageMaxWidth = 280.dp
     val ChatBotMessageIconSize = 24.dp
 
+    val ReviewRatingButtonSize = 36.dp
+
 
 }

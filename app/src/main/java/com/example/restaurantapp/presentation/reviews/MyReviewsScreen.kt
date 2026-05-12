@@ -66,6 +66,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 
 
 private val ReviewBg = Color.White
@@ -182,6 +185,9 @@ fun MyReviewsScreen(
                     ) { review ->
                         ReviewArchiveCard(
                             review = review,
+                            onEditClick = {
+                                viewModel.onEditClick(review)
+                            },
                             onDeleteClick = {
                                 viewModel.onDeleteClick(review)
                             }
@@ -233,6 +239,29 @@ fun MyReviewsScreen(
                     Text(stringResource(R.string.cancel))
                 }
             }
+        }
+    }
+    if (uiState.showEditSheet && uiState.selectedReview != null) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::dismissEditSheet,
+            containerColor = ReviewCardBg
+        ) {
+            EditReviewSheetContent(
+                commentText = uiState.editCommentText,
+                tasteRating = uiState.editTasteRating,
+                serviceRating = uiState.editServiceRating,
+                pricePerformanceRating = uiState.editPricePerformanceRating,
+                atmosphereRating = uiState.editAtmosphereRating,
+                locationRating = uiState.editLocationRating,
+                onCommentTextChanged = viewModel::updateEditCommentText,
+                onTasteRatingChanged = viewModel::updateEditTasteRating,
+                onServiceRatingChanged = viewModel::updateEditServiceRating,
+                onPricePerformanceRatingChanged = viewModel::updateEditPricePerformanceRating,
+                onAtmosphereRatingChanged = viewModel::updateEditAtmosphereRating,
+                onLocationRatingChanged = viewModel::updateEditLocationRating,
+                onSaveClick = viewModel::updateSelectedReview,
+                onCancelClick = viewModel::dismissEditSheet
+            )
         }
     }
 }
@@ -322,6 +351,7 @@ private fun ReviewsHeader(
 @Composable
 private fun ReviewArchiveCard(
     review: UserComment,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     val isExpanded = rememberSaveable(review.commentId) {
@@ -366,22 +396,38 @@ private fun ReviewArchiveCard(
 
                     SmallMutedText(text = review.district.ifBlank { "-" })
                 }
-
                 Column(
                     modifier = Modifier.padding(top = UiConstants.TinySpacing),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
                 ) {
-                    IconButton(
-                        onClick = onDeleteClick,
-                        modifier = Modifier.size(UiConstants.ReviewDeleteIconButtonSize)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteOutline,
-                            contentDescription = null,
-                            tint = ReviewDanger,
-                            modifier = Modifier.size(UiConstants.ReviewDeleteIconSize)
-                        )
+                        IconButton(
+                            onClick = onEditClick,
+                            modifier = Modifier.size(UiConstants.ReviewDeleteIconButtonSize)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                tint = ReviewBlue,
+                                modifier = Modifier.size(UiConstants.ReviewDeleteIconSize)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = onDeleteClick,
+                            modifier = Modifier.size(UiConstants.ReviewDeleteIconButtonSize)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = null,
+                                tint = ReviewDanger,
+                                modifier = Modifier.size(UiConstants.ReviewDeleteIconSize)
+                            )
+                        }
                     }
 
                     RatingBadge(rating = review.generalRating)
@@ -477,7 +523,154 @@ private fun ReviewArchiveCard(
         }
     }
 }
+@Composable
+private fun EditReviewSheetContent(
+    commentText: String,
+    tasteRating: Int,
+    serviceRating: Int,
+    pricePerformanceRating: Int,
+    atmosphereRating: Int,
+    locationRating: Int,
+    onCommentTextChanged: (String) -> Unit,
+    onTasteRatingChanged: (Int) -> Unit,
+    onServiceRatingChanged: (Int) -> Unit,
+    onPricePerformanceRatingChanged: (Int) -> Unit,
+    onAtmosphereRatingChanged: (Int) -> Unit,
+    onLocationRatingChanged: (Int) -> Unit,
+    onSaveClick: () -> Unit,
+    onCancelClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(UiConstants.BottomSheetPadding),
+        verticalArrangement = Arrangement.spacedBy(UiConstants.BottomSheetSpacing)
+    ) {
+        Text(
+            text = "Yorumu Düzenle",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = ReviewTitleColor
+        )
 
+        OutlinedTextField(
+            value = commentText,
+            onValueChange = onCommentTextChanged,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Yorum")
+            },
+            minLines = 3,
+            shape = RoundedCornerShape(UiConstants.TextFieldRadius),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = ReviewBlue,
+                unfocusedBorderColor = ReviewCardBorder,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = ReviewBlue
+            )
+        )
+
+        EditRatingSelector(
+            title = stringResource(R.string.criterion_taste),
+            selectedRating = tasteRating,
+            onRatingSelected = onTasteRatingChanged
+        )
+
+        EditRatingSelector(
+            title = stringResource(R.string.criterion_service),
+            selectedRating = serviceRating,
+            onRatingSelected = onServiceRatingChanged
+        )
+
+        EditRatingSelector(
+            title = stringResource(R.string.criterion_price_performance),
+            selectedRating = pricePerformanceRating,
+            onRatingSelected = onPricePerformanceRatingChanged
+        )
+
+        EditRatingSelector(
+            title = stringResource(R.string.criterion_atmosphere),
+            selectedRating = atmosphereRating,
+            onRatingSelected = onAtmosphereRatingChanged
+        )
+
+        EditRatingSelector(
+            title = stringResource(R.string.criterion_location),
+            selectedRating = locationRating,
+            onRatingSelected = onLocationRatingChanged
+        )
+
+        Button(
+            onClick = onSaveClick,
+            colors = ButtonDefaults.buttonColors(containerColor = ReviewBlue),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(UiConstants.ButtonRadius)
+        ) {
+            Text("Kaydet")
+        }
+
+        OutlinedButton(
+            onClick = onCancelClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(UiConstants.ButtonRadius)
+        ) {
+            Text(stringResource(R.string.cancel))
+        }
+    }
+}
+
+@Composable
+private fun EditRatingSelector(
+    title: String,
+    selectedRating: Int,
+    onRatingSelected: (Int) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(UiConstants.ExtraSmallSpacing)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = ReviewBodyColor,
+            fontWeight = FontWeight.Medium
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(UiConstants.SmallSpacing)
+        ) {
+            (1..5).forEach { rating ->
+                Surface(
+                    shape = CircleShape,
+                    color = if (selectedRating == rating) {
+                        ReviewBlue
+                    } else {
+                        ReviewBlueSoft
+                    },
+                    modifier = Modifier
+                        .size(UiConstants.ReviewRatingButtonSize)
+                        .clickable {
+                            onRatingSelected(rating)
+                        }
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = rating.toString(),
+                            color = if (selectedRating == rating) {
+                                Color.White
+                            } else {
+                                ReviewBlue
+                            },
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 @Composable
 private fun RatingBadge(
     rating: Double
