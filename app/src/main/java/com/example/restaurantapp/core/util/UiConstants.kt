@@ -128,7 +128,11 @@ object UiConstants {
 
     val LottieLoadingSize = 190.dp
 
+    // Chatbot
     val ChatBotFabIconSize = 70.dp
     val ChatBotFabSize = 56.dp
     val ChatBotHintArrowSize = 8.dp
+    val ChatBotMessageMaxWidth = 280.dp
+
+
 }

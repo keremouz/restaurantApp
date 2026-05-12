@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -160,7 +161,9 @@ private fun ChatMessageBubble(
         horizontalAlignment = horizontalAlignment
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(0.82f),
+            modifier = Modifier.widthIn(
+                max = UiConstants.ChatBotMessageMaxWidth
+            ),
             shape = RoundedCornerShape(UiConstants.CardRadius),
             colors = CardDefaults.cardColors(
                 containerColor = bubbleColor
