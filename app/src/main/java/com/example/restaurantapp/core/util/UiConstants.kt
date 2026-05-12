@@ -133,6 +133,7 @@ object UiConstants {
     val ChatBotFabSize = 56.dp
     val ChatBotHintArrowSize = 8.dp
     val ChatBotMessageMaxWidth = 280.dp
+    val ChatBotMessageIconSize = 24.dp
 
 
 }

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +42,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 
 private val ChatBotBlue = Color(0xFF2F5BFF)
 private val ChatBotBg = Color(0xFFF5F8FF)
@@ -186,10 +189,11 @@ private fun ChatMessageBubble(
                 verticalAlignment = Alignment.Top
             ) {
                 if (!message.isFromUser) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_ai_location),
                         contentDescription = null,
-                        tint = ChatBotBlue
+                        modifier = Modifier.size(UiConstants.ChatBotMessageIconSize),
+                        contentScale = ContentScale.Fit
                     )
                 }
 
