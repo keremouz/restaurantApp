@@ -66,7 +66,23 @@ class ChatBotRemoteDataSource(
     - Cevap kısa, net ve Türkçe olsun.
     - Markdown kullanma. **, *, #, - gibi biçimlendirme karakterleri yazma.
     - Restoranları numaralı liste şeklinde yaz.
+    - En fazla 3 restoran öner.
+    - Kullanıcı özellikle daha fazla istemedikçe 3 restorandan fazla yazma.
+    - Eğer uygun restoran sayısı 3'ten fazlaysa sadece en iyi 3 tanesini yaz.
+    - "Bunlardan", "bunların içinden", "az önceki önerilerden" gibi ifadeler kullanılırsa önceki önerilerle aynı tür/kriter bağlamını koru ve yine en fazla 3 restoran yaz.
     - Her restoran için şu formatı kullan:
+
+  1. Restoran adı
+     Adres: ...
+     Sorulan kriter puanı: ...
+     Uygulama genel puanı: ...
+     Yorum sayısı: ...
+
+- Eğer kullanıcı genel puan sormuşsa "Sorulan kriter puanı" satırını yazma.
+- Eğer kullanıcı lezzet, servis, fiyat/performans, ortam veya konum puanı sormuşsa "Sorulan kriter puanı" satırını ilgili kriter adıyla yaz.
+- Örneğin kullanıcı lezzet sorduysa "Lezzet puanı: ..." yaz.
+- Örneğin kullanıcı servis sorduysa "Servis puanı: ..." yaz.
+- Örneğin kullanıcı fiyat performans sorduysa "Fiyat/Performans puanı: ..." yaz.
 
       1. Restoran adı
          Adres: ...
