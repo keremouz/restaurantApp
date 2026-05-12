@@ -96,19 +96,19 @@ private val ChatHintBorder = Color(0xFFDCE6FF)
 
 private val MapCategories = listOf(
     MapCategory(MAP_CATEGORY_ALL, "Tümü", Color(0xFF2F5BFF)),
-    MapCategory("restaurant", "Restoran", Color(0xFF5E6CE7)),
-    MapCategory("doner", "Döner", Color(0xFFFF7043)),
-    MapCategory("fish", "Balık", Color(0xFF00A6D6)),
-    MapCategory("burger", "Burger", Color(0xFFFFB300)),
-    MapCategory("kebab", "Kebap", Color(0xFFD84315)),
-    MapCategory("pide", "Pide", Color(0xFFFF8A65)),
-    MapCategory("breakfast", "Kahvaltı", Color(0xFF43A047)),
-    MapCategory("dessert", "Tatlı", Color(0xFFE91E63)),
-    MapCategory("cafe", "Kafe", Color(0xFF8D6E63)),
-    MapCategory("steak", "Steak", Color(0xFF795548)),
-    MapCategory("pizza", "Pizza", Color(0xFFEF5350)),
-    MapCategory("sushi", "Sushi", Color(0xFF26A69A)),
-    MapCategory("meyhane", "Meyhane", Color(0xFF7E57C2))
+    MapCategory("restaurant", "Restoran", Color(0xFF2F5BFF)),
+    MapCategory("doner", "Döner", Color(0xFF2F5BFF)),
+    MapCategory("fish", "Balık", Color(0xFF2F5BFF)),
+    MapCategory("burger", "Burger", Color(0xFF2F5BFF)),
+    MapCategory("kebab", "Kebap", Color(0xFF2F5BFF)),
+    MapCategory("pide", "Pide", Color(0xFF2F5BFF)),
+    MapCategory("breakfast", "Kahvaltı", Color(0xFF2F5BFF)),
+    MapCategory("dessert", "Tatlı", Color(0xFF2F5BFF)),
+    MapCategory("cafe", "Kafe", Color(0xFF2F5BFF)),
+    MapCategory("steak", "Steak", Color(0xFF2F5BFF)),
+    MapCategory("pizza", "Pizza", Color(0xFF2F5BFF)),
+    MapCategory("sushi", "Sushi", Color(0xFF2F5BFF)),
+    MapCategory("meyhane", "Meyhane", Color(0xFF2F5BFF))
 )
 
 @Composable
