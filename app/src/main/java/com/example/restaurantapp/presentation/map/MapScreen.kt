@@ -258,6 +258,7 @@ fun MapScreen(
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.White,
         topBar = {
             MapTopBar(
                 selectedCategory = uiState.selectedCategory,
@@ -285,11 +286,11 @@ fun MapScreen(
                     contentPadding = paddingValues
                 )
             }
-
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
@@ -314,6 +315,7 @@ fun MapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
@@ -328,6 +330,7 @@ fun MapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
@@ -342,6 +345,7 @@ fun MapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(Color.White)
                         .padding(paddingValues)
                 ) {
                     GoogleMap(
@@ -741,11 +745,19 @@ private fun MapTopBar(
                 singleLine = true,
                 shape = RoundedCornerShape(UiConstants.TextFieldRadius),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
                     focusedBorderColor = MapIconBlue,
                     unfocusedBorderColor = ChatHintBorder,
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    cursorColor = MapIconBlue
+                    cursorColor = MapIconBlue,
+                    focusedPlaceholderColor = MapSubtitleColor,
+                    unfocusedPlaceholderColor = MapSubtitleColor,
+                    focusedLeadingIconColor = MapIconBlue,
+                    unfocusedLeadingIconColor = MapIconBlue,
+                    focusedTrailingIconColor = MapIconBlue,
+                    unfocusedTrailingIconColor = MapIconBlue
                 )
             )
 

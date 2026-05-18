@@ -148,7 +148,7 @@
     <string name="map_subtitle">Discover nearby restaurants</string>
     <string name="write_review_title">Write Review</string>
     <string name="submit">Submit</string>
-    <string name="rate_your_experience">Rate your\nexperience</string>
+    <string name="rate_your_experience">Rate your experience</string>
     <string name="comment_hint">Share your thoughts about food, service and atmosphere...</string>
 
     <string name="rating_select">Select</string>

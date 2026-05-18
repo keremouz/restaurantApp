@@ -51,6 +51,7 @@ import com.example.restaurantapp.R
 import com.example.restaurantapp.core.util.UiConstants
 import com.example.restaurantapp.domain.model.Restaurant
 import java.util.Locale
+import androidx.compose.foundation.background
 
 private val DetailBlue = Color(0xFF2F5BFF)
 private val DetailBlueDark = Color(0xFF1E4AE9)
@@ -154,6 +155,7 @@ fun RestaurantDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(DetailBg)
                 .padding(paddingValues)
                 .padding(horizontal = UiConstants.ScreenPadding)
                 .verticalScroll(rememberScrollState())
@@ -321,11 +323,23 @@ fun RestaurantDetailScreen(
                 maxLines = UiConstants.COMMENT_FIELD_MIN_LINES + 3,
                 shape = RoundedCornerShape(UiConstants.TextFieldRadius),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = DetailTextPrimary,
+                    unfocusedTextColor = DetailTextPrimary,
+                    disabledTextColor = DetailTextSecondary,
+
                     focusedBorderColor = DetailBlue,
                     unfocusedBorderColor = DetailBorder,
+                    disabledBorderColor = DetailBorder,
+
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
+                    disabledContainerColor = Color.White,
+
                     cursorColor = DetailBlue,
+
+                    focusedPlaceholderColor = Color(0xFFAEB8D3),
+                    unfocusedPlaceholderColor = Color(0xFFAEB8D3),
+
                     focusedLabelColor = DetailBlue,
                     unfocusedLabelColor = DetailTextSecondary
                 )

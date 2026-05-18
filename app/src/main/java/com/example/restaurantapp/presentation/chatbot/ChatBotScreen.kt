@@ -246,11 +246,15 @@ private fun ChatInputBar(
                 },
                 shape = RoundedCornerShape(UiConstants.TextFieldRadius),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = ChatBotText,
+                    unfocusedTextColor = ChatBotText,
                     focusedBorderColor = ChatBotBlue,
                     unfocusedBorderColor = ChatBotBorder,
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
-                    cursorColor = ChatBotBlue
+                    cursorColor = ChatBotBlue,
+                    focusedPlaceholderColor = ChatBotHint,
+                    unfocusedPlaceholderColor = ChatBotHint
                 )
             )
 

@@ -76,6 +76,7 @@
 ##################################################
 # DOMAIN MODELS
 ##################################################
+-keep class com.example.restaurantapp.domain.model.** { *; }
 # Navigation / savedState / Parcelable veya mapping tarafında sorun yaşanmaması için
 # domain modeller hedefli korunur.
 -keep class com.example.restaurantapp.domain.model.** { *; }
