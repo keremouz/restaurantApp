@@ -222,23 +222,4 @@ class RestaurantDetailViewModel(
         )
     }
 
-    private fun extractDistrict(address: String): String {
-        val slashParts = address.split("/")
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-
-        if (slashParts.size >= 2) {
-            return slashParts[slashParts.lastIndex - 1]
-        }
-
-        val commaParts = address.split(",")
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-
-        return if (commaParts.size >= 2) {
-            commaParts[commaParts.lastIndex - 1]
-        } else {
-            address
-        }
-    }
 }
